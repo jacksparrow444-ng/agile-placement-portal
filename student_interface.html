@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Registration | Placement Portal</title>
+    <link rel="stylesheet" href="student_interface.css">
+</head>
+
+<body>
+
+    <div class="wrapper">
+
+        <div class="branding">
+            <h1>Placement Portal</h1>
+            <p>Register as a student to explore internship and placement opportunities.</p>
+        </div>
+
+        <div class="form-section">
+            <div class="form-card">
+                <h2>Student Registration</h2>
+
+                <form id="studentForm">
+
+                    <div class="form-row">
+                        <input type="text" id="studentName" placeholder="Full Name" required>
+                    </div>
+
+                    <div class="form-row">
+                        <input type="text" id="rollNumber" placeholder="Roll/Registration Number" required>
+                    </div>
+
+                    <div class="form-row">
+                        <select id="department" required
+                            style="width:100%; padding:12px; margin:12px 0; border-radius:15px; border:1px solid #ccc; transition:0.3s ease;">
+                            <option value="" disabled selected>Select Department</option>
+                            <option value="CSE">Computer Science</option>
+                            <option value="IT">Information Technology</option>
+                            <option value="ECE">Electronics and Communication</option>
+                            <option value="EE">Electrical Engineering</option>
+                            <option value="ME">Mechanical Engineering</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <input type="email" id="email" placeholder="Institutional Email Address" required>
+                    </div>
+
+                    <div class="form-row">
+                        <input type="text" id="contact" placeholder="Contact Number" required>
+                    </div>
+
+                    <div class="form-row">
+                        <input type="password" id="password" placeholder="Password (Min 6 characters)" required>
+                    </div>
+
+                    <div class="form-row checkbox-row">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms">I agree to the Terms & Conditions</label>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        Register Student
+                    </button>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- OTP MODAL -->
+    <div class="modal-overlay" id="otpModal">
+        <div class="modal-box">
+            <h3>Email Verification</h3>
+            <p>Please enter the OTP sent to your institutional email</p>
+
+            <input type="text" id="otpInput" placeholder="Enter OTP">
+
+            <p id="timerText" class="timer"></p>
+            <p id="otpError" class="error"></p>
+
+            <div class="modal-actions">
+                <button id="verifyOtpBtn" class="btn-primary">Verify OTP</button>
+                <button id="resendOtpBtn" class="btn-secondary"
+                    style="margin-top: 10px; width: 100%; padding: 12px; border: none; border-radius: 15px; background: #e0e0e0; cursor: pointer;"
+                    disabled>Resend OTP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUCCESS MODAL -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-box">
+            <h3>Registration Successful</h3>
+            <p>Your email has been verified successfully.</p>
+            <button id="closeSuccessBtn" class="btn-primary">Close</button>
+        </div>
+    </div>
+
+    <script src="student_interface.js"></script>
+</body>
+
+</html>

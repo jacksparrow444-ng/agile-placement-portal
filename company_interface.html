@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Company Registration | Placement Portal</title>
+    <link rel="stylesheet" href="company_interface.css">
+</head>
+<body>
+
+<div class="wrapper">
+
+    <div class="branding">
+        <h1>Placement Portal</h1>
+        <p>Partner with us to recruit top talent from our institution.</p>
+    </div>
+
+    <div class="form-section">
+        <div class="form-card">
+            <h2>Company Registration</h2>
+
+            <form id="companyForm">
+
+                <div class="form-row">
+                    <input type="text" id="companyName" placeholder="Company Name" required>
+                </div>
+
+                <div class="form-row">
+                    <input type="text" id="hrName" placeholder="HR Representative Name" required>
+                </div>
+
+                <div class="form-row">
+                    <input type="email" id="email" placeholder="Official Email Address" required>
+                </div>
+
+                <div class="form-row">
+                    <input type="text" id="contact" placeholder="Contact Number" required>
+                </div>
+
+                <div class="form-row">
+                    <input type="password" id="password" placeholder="Password (Min 6 characters)" required>
+                </div>
+
+                <div class="form-row checkbox-row">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">I agree to Terms & Conditions</label>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    Register Company
+                </button>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<!-- OTP MODAL -->
+<div class="modal-overlay" id="otpModal">
+    <div class="modal-box">
+        <h3>Email Verification</h3>
+        <p>Please enter the OTP sent to your official email</p>
+
+        <input type="text" id="otpInput" placeholder="Enter OTP">
+
+        <p id="timerText" class="timer"></p>
+        <p id="otpError" class="error"></p>
+
+        <div class="modal-actions">
+            <button id="verifyOtpBtn" class="btn-primary">Verify OTP</button>
+            <button id="resendOtpBtn" class="btn-secondary" disabled>Resend OTP</button>
+        </div>
+    </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal-box">
+        <h3>Registration Successful</h3>
+        <p>Your email has been verified successfully.</p>
+        <button id="closeSuccessBtn" class="btn-primary">Close</button>
+    </div>
+</div>
+
+<script src="company_interface.js"></script>
+</body>
+</html>
