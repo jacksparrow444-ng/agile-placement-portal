@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TPO Staff Portal | Registration & Login</title>
+    <link rel="stylesheet" href="tpo_auth.css">
+</head>
+<body>
+
+<div class="wrapper">
+
+    <div class="branding">
+        <h1>TPO Portal</h1>
+        <p>Manage placement drives, approve companies, and guide students towards their dream careers.</p>
+        <div class="branding-footer">
+            <p>Placement & Internship Cell</p>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <div class="form-card">
+            <h2 id="formTitle">TPO Staff Registration</h2>
+            <p class="subtitle">Create your admin account to access the portal.</p>
+
+            <form id="tpoForm">
+                
+                <div class="form-row">
+                    <input type="text" id="tpoName" placeholder="Full Name" required>
+                </div>
+
+                <div class="form-row">
+                    <input type="text" id="staffId" placeholder="Staff ID / Employee ID" required>
+                </div>
+
+                <div class="form-row">
+                    <input type="email" id="tpoEmail" placeholder="Institutional Email (@college.edu)" required>
+                </div>
+
+                <div class="form-row">
+                    <input type="text" id="tpoContact" placeholder="Contact Number" required>
+                </div>
+
+                <div class="form-row">
+                    <input type="password" id="tpoPassword" placeholder="Password (Min 6 characters)" required minlength="6">
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    Register as TPO
+                </button>
+
+                <p class="toggle-text">
+                    Already have an account? <a href="#" id="toggleLogin">Login here</a>
+                </p>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-overlay" id="otpModal">
+    <div class="modal-box">
+        <h3>Security Verification</h3>
+        <p>Please enter the OTP sent to your registered email</p>
+        <input type="text" id="otpInput" placeholder="Enter 4-digit OTP" maxlength="4">
+        
+        <p id="timerText" class="timer"></p>
+        <p id="otpError" class="error"></p>
+        
+        <div class="modal-actions">
+            <button id="verifyOtpBtn" class="btn-primary">Verify OTP</button>
+            <button id="resendOtpBtn" class="btn-secondary" disabled>Resend OTP</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="successModal">
+    <div class="modal-box">
+        <h3 id="successTitle">Verified Successfully</h3>
+        <p id="successMsg">Authentication complete.</p>
+        <button id="closeSuccessBtn" class="btn-primary">Continue</button>
+    </div>
+</div>
+
+<script src="tpo_auth.js"></script>
+</body>
+</html>

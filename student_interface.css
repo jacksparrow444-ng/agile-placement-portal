@@ -169,3 +169,42 @@ input:focus, select:focus{
     font-weight:500;
     color:#007b5e;
 }
+/* Update Select Field styling so it matches input fields */
+select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 15px;
+    border: 1px solid #ccc;
+    transition: 0.3s ease;
+    background: white;
+}
+
+/* Toggle Text Style */
+.toggle-text {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #555;
+}
+
+.toggle-text a {
+    color: #007b5e;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.toggle-text a:hover {
+    text-decoration: underline;
+}
+
+/* Modal Action buttons display fix */
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.btn-secondary {
+    margin-top: 15px !important; /* Overriding your inline style */
+}

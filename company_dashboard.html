@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Console | Placement Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="company_dashboard.css">
+</head>
+<body>
+
+<div class="dashboard-wrapper">
+    <aside class="sidebar">
+        <div class="logo-section">
+            <h2>Placement &<span>Internship</span></h2>
+        </div>
+        <nav class="nav-links">
+            <a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="#" class="locked" id="sidePostBtn"><i class="fas fa-plus-square"></i> Post Job <i class="fas fa-lock"></i></a>
+            <a href="#" class="locked"><i class="fas fa-user-graduate"></i> Applications <i class="fas fa-lock"></i></a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="index.html" class="logout"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="user-info">
+                <h1>Google India</h1>
+                <span class="status-pill unverified" id="statusBadge">Unverified</span>
+            </div>
+            <div class="profile-tab">
+                <div class="avatar">G</div>
+            </div>
+        </header>
+
+        <section id="verificationSection" class="hero-card fade-in">
+            <div class="hero-content">
+                <i class="fas fa-shield-halved"></i>
+                <h2>Campus Recruitment Access</h2>
+                <p>Submit your recruitment request to the TPO Staff. Once verified, you can manage your drives and shortlist students.</p>
+                <button class="btn-primary" id="sendReqBtn" onclick="requestAccess()">Send Access Request</button>
+                <div id="pendingMsg" class="hidden">
+                    <div class="pulse-loader"></div>
+                    <p class="warning-text">Request Sent! Waiting for TPO Approval...</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="dashboardSection" class="hidden fade-in">
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="icon-box blue"><i class="fas fa-briefcase"></i></div>
+                    <div class="data"><h3>Active Jobs</h3><p id="jobCount">0</p></div>
+                </div>
+                <div class="stat-item">
+                    <div class="icon-box green"><i class="fas fa-users-check"></i></div>
+                    <div class="data"><h3>Shortlisted</h3><p>0</p></div>
+                </div>
+            </div>
+
+            <div class="content-box">
+                <div class="box-header">
+                    <h2>Manage Opportunities</h2>
+                    <button class="btn-primary-sm" onclick="openModal()"><i class="fas fa-plus"></i> New Posting</button>
+                </div>
+                <table class="job-table">
+                    <thead>
+                        <tr>
+                            <th>Job Role</th>
+                            <th>Target Branch</th>
+                            <th>Package (LPA)</th>
+                            <th>Deadline</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jobList"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div class="modal-overlay" id="jobModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Post Detailed Opportunity</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="detailedJobForm">
+            <div class="form-grid">
+                <div class="field"><label>Job Title</label><input type="text" id="jTitle" required></div>
+                <div class="field"><label>Package (LPA)</label><input type="number" id="jPack" required></div>
+                <div class="field"><label>Target Branch</label>
+                    <select id="jBranch"><option value="CSE/IT">CSE/IT</option><option value="All Branches">All Branches</option></select>
+                </div>
+                <div class="field"><label>Application Deadline</label><input type="date" id="jDate" required></div>
+            </div>
+            <div class="field full"><label>Job Description</label><textarea id="jDesc" rows="4" required></textarea></div>
+            <button type="submit" class="btn-submit">Publish Drive</button>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="toast">Action completed!</div>
+
+<script src="company_dashboard.js"></script>
+</body>
+</html>

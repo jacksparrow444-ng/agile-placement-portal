@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications | Placement & Internship</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="student_applications.css">
+</head>
+<body>
+
+<div class="dashboard-wrapper">
+    <aside class="sidebar">
+        <div class="logo-area">
+            <h2>Placement &<span> Internship</span></h2>
+        </div>
+        <nav class="nav-menu">
+            <a href="student_job_feed.html" class="nav-item"><i class="fas fa-th-large"></i> Job Feed</a>
+            <a href="student_applications.html" class="nav-item active"><i class="fas fa-layer-group"></i> My Applications</a>
+            <a href="student_profile.html" class="nav-item"><i class="fas fa-user-circle"></i> My Profile</a>
+        </nav>
+        <div class="logout-area">
+            <a href="index.html" class="nav-item text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header fade-in-up">
+            <div class="header-text">
+                <h1>My Selection Journey</h1>
+                <p>Track your interview schedules and final placement results.</p>
+            </div>
+        </header>
+
+        <div class="table-card fade-in-up delay-1" style="margin-bottom: 30px;">
+            <div class="table-header">
+                <h2><i class="fas fa-calendar-alt" style="color: #0ea5e9;"></i> Upcoming Interviews</h2>
+            </div>
+            <table class="premium-table">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Date & Time</th>
+                        <th>Round</th>
+                        <th>Mode</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Microsoft</strong></td>
+                        <td>Mar 15, 2026 | 10:00 AM</td>
+                        <td>Technical Round 1</td>
+                        <td><span class="status-badge approved">Online</span></td>
+                        <td><button class="btn-view" onclick="alert('Joining Link...')">Join Meeting</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-card fade-in-up delay-2">
+            <div class="table-header">
+                <h2><i class="fas fa-poll-h" style="color: #10b981;"></i> Application Results</h2>
+            </div>
+            <table class="premium-table">
+                <thead>
+                    <tr>
+                        <th>Company & Role</th>
+                        <th>Status</th>
+                        <th>Final Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Google India</strong><br><small>SDE Intern</small></td>
+                        <td><span class="status-badge pending">Interview Done</span></td>
+                        <td><span class="tag">Awaited</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Amazon</strong><br><small>Frontend Intern</small></td>
+                        <td><span class="status-badge rejected">Not Selected</span></td>
+                        <td><span class="tag" style="color: #ef4444;">Try Next Time</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

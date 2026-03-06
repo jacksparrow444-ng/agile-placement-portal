@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Feed | Placement and Internship</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="student_job_feed.css">
+</head>
+<body>
+
+<div class="dashboard-wrapper">
+    
+    <aside class="sidebar">
+        <div class="logo-area">
+            <h2>Placement &<span> Internship</span></h2>
+        </div>
+        <nav class="nav-menu">
+            <a href="student_job_feed.html" class="nav-item" id="nav-feed"><i class="fas fa-th-large"></i> Job Feed</a>
+            
+            <a href="student_applications.html" class="nav-item" id="nav-apps"><i class="fas fa-layer-group"></i> My Applications</a>
+            
+            <a href="student_profile.html" class="nav-item" id="nav-profile"><i class="fas fa-user-circle"></i> My Profile</a>
+            
+            <a href="#" class="nav-item"><i class="fas fa-bell"></i> Notifications</a>
+        </nav>
+        <div class="logout-area">
+            <a href="index.html" class="nav-item text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <header class="top-header fade-in-up">
+            <div class="header-text">
+                <h1>Explore Opportunities</h1>
+                <p>Find and apply for the best internships and placement drives.</p>
+            </div>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search by role or company...">
+                <button class="btn-primary-glow">Search</button>
+            </div>
+        </header>
+
+        <div class="feed-layout fade-in-up delay-1">
+            
+            <aside class="filters-sidebar">
+                <div class="filter-group">
+                    <h3><i class="fas fa-filter"></i> Filters</h3>
+                </div>
+                
+                <div class="filter-group">
+                    <h4>Job Type</h4>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="filter-type" value="internship" checked> <span class="checkmark"></span> Internship
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="filter-type" value="fulltime" checked> <span class="checkmark"></span> Full-Time
+                    </label>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Work Mode</h4>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="filter-mode" value="remote"> <span class="checkmark"></span> Work from Home
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="filter-mode" value="office"> <span class="checkmark"></span> In-Office
+                    </label>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Location</h4>
+                    <select id="locationFilter" class="premium-select">
+                        <option value="all">Any Location</option>
+                        <option value="bangalore">Bangalore</option>
+                        <option value="hyderabad">Hyderabad</option>
+                        <option value="pune">Pune</option>
+                        <option value="gurgaon">Gurgaon</option>
+                    </select>
+                </div>
+            </aside>
+
+            <div class="jobs-grid" id="jobsContainer">
+                
+                <div class="job-card" data-type="internship" data-mode="office" data-location="bangalore">
+                    <div class="card-header">
+                        <div class="company-logo">
+                            <i class="fab fa-google" style="color: #DB4437;"></i>
+                        </div>
+                        <span class="badge badge-hot">Hot Role</span>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="job-title">Software Engineer Intern</h2>
+                        <p class="company-name">Google India</p>
+                        <div class="job-tags">
+                            <span class="tag"><i class="fas fa-map-marker-alt"></i> Bangalore</span>
+                            <span class="tag"><i class="fas fa-building"></i> In-Office</span>
+                            <span class="tag"><i class="fas fa-rupee-sign"></i> 50k / month</span>
+                        </div>
+                        <p class="job-desc">Join the Search team to build scalable backend systems using C++ and Python.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="post-time">Posted 2 days ago</span>
+                        <button class="btn-outline-premium apply-btn" data-job="Software Engineer Intern at Google">Apply Now</button>
+                    </div>
+                </div>
+
+                <div class="job-card" data-type="fulltime" data-mode="remote" data-location="all">
+                    <div class="card-header">
+                        <div class="company-logo">
+                            <i class="fab fa-microsoft" style="color: #00A4EF;"></i>
+                        </div>
+                        <span class="badge badge-new">New</span>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="job-title">Data Analyst</h2>
+                        <p class="company-name">Microsoft</p>
+                        <div class="job-tags">
+                            <span class="tag"><i class="fas fa-laptop-house"></i> Remote</span>
+                            <span class="tag"><i class="fas fa-briefcase"></i> Full-Time</span>
+                            <span class="tag"><i class="fas fa-rupee-sign"></i> 14 LPA</span>
+                        </div>
+                        <p class="job-desc">Looking for data enthusiasts with expertise in SQL, PowerBI, and Python.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="post-time">Posted 5 hours ago</span>
+                        <button class="btn-outline-premium apply-btn" data-job="Data Analyst at Microsoft">Apply Now</button>
+                    </div>
+                </div>
+
+                <div class="job-card" data-type="internship" data-mode="office" data-location="hyderabad">
+                    <div class="card-header">
+                        <div class="company-logo">
+                            <i class="fab fa-amazon" style="color: #FF9900;"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="job-title">Frontend Developer Intern</h2>
+                        <p class="company-name">Amazon</p>
+                        <div class="job-tags">
+                            <span class="tag"><i class="fas fa-map-marker-alt"></i> Hyderabad</span>
+                            <span class="tag"><i class="fas fa-building"></i> In-Office</span>
+                            <span class="tag"><i class="fas fa-rupee-sign"></i> 40k / month</span>
+                        </div>
+                        <p class="job-desc">Work with the AWS UI team. Required skills include React, JavaScript, CSS3.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="post-time">Posted 1 week ago</span>
+                        <button class="btn-outline-premium apply-btn" data-job="Frontend Developer Intern at Amazon">Apply Now</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="modal-overlay" id="applyModal">
+    <div class="modal-box slide-down">
+        <div class="modal-header">
+            <h2>Apply for Role</h2>
+            <button class="close-modal" id="closeModalBtn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="apply-info">
+            <p>Applying for: <strong id="modalJobTitle" style="color: #0ea5e9;">Role Name</strong></p>
+            <p class="hint-text"><i class="fas fa-check-circle"></i> Your profile details and verified resume will be automatically attached.</p>
+        </div>
+        <form id="applyJobForm" class="premium-form">
+            <div class="input-group" style="margin-top: 20px;">
+                <label>Cover Letter / Why should we hire you? (Optional)</label>
+                <textarea rows="4" placeholder="Express your interest and highlight your best skills..."></textarea>
+            </div>
+            <button type="submit" class="btn-primary-glow" style="width: 100%; justify-content: center; margin-top: 10px;">
+                <i class="fas fa-paper-plane"></i> Submit Application
+            </button>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="toast-notification">
+    <i class="fas fa-check-circle toast-icon"></i>
+    <span id="toastMsg">Application submitted successfully!</span>
+</div>
+
+<script src="student_job_feed.js"></script>
+</body>
+</html>
