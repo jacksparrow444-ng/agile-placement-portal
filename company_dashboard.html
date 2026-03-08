@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Company Dashboard | Placement Portal</title>
+    <link rel="stylesheet" href="company_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>Company<span>Portal</span></h2>
+            <nav id="sidebarNav">
+                <a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a>
+                <div id="verifiedMenu" style="display: none;">
+                    <a href="post_job.html"><i class="fas fa-plus-circle"></i> Post New Job</a>
+                    <a href="manage_jobs.html"><i class="fas fa-tasks"></i> Manage Jobs</a>
+                    <a href="view_applicants.html"><i class="fas fa-users"></i> View Applicants</a>
+                </div>
+                <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <header style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                <h1 id="compHeader">Welcome, Company</h1>
+                <span id="statusPill" style="padding: 5px 15px; border-radius: 20px; color: white; font-weight: bold; font-size: 12px;">Checking...</span>
+            </header>
+
+            <div id="mainView" style="margin-top: 20px;">
+                </div>
+        </main>
+    </div>
+
+    <script>
+        // --- 1. Main Function: Page Load Pe Chalta Hai ---
+        async function initializeDashboard() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user) { window.location.href = 'index.html'; return; }
+
+            document.getElementById('compHeader').innerText = `Welcome, ${user.companyName}`;
+
+            // UI render karo (Status ke hisab se)
+            renderUI(user.status);
+
+            // Agar verified hai toh server se taaza data (counts) lao
+            if (user.status === 'verified') {
+                await fetchFreshStats(user.id);
+            }
+        }
+
+        // --- 2. UI Render karne wala function ---
+        function renderUI(status) {
+            const menu = document.getElementById('verifiedMenu');
+            const pill = document.getElementById('statusPill');
+            const main = document.getElementById('mainView');
+
+            if (status === 'verified') {
+                pill.innerText = "VERIFIED";
+                pill.style.background = "#10b981";
+                menu.style.display = "block";
+                main.innerHTML = `
+                    <div id="dashboardStats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            <h3 id="jobCountDisplay">0</h3><p>Jobs Posted</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            <h3 id="applicantCountDisplay">0</h3><p>Total Applicants</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            <h3>0</h3><p>Selected</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                pill.innerText = "PENDING APPROVAL";
+                pill.style.background = "#f59e0b";
+                menu.style.display = "none";
+                main.innerHTML = `
+                    <div style="background: #fffbeb; border: 2px dashed #f59e0b; padding: 40px; border-radius: 15px; text-align: center;">
+                        <i class="fas fa-user-clock" style="font-size: 50px; color: #f59e0b; margin-bottom: 15px;"></i>
+                        <h2>Waiting for TPO Approval</h2>
+                        <p>Your account is under review. You can post jobs once verified.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // --- 3. Server se real-time counts laane wala function ---
+        async function fetchFreshStats(companyId) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/company/stats/${companyId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('jobCountDisplay').innerText = data.jobCount;
+                    document.getElementById('applicantCountDisplay').innerText = data.applicantCount;
+                }
+            } catch (err) {
+                console.error("Stats Fetch Error:", err);
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        // Page load pe initializeDashboard chalao
+        window.onload = initializeDashboard;
+    </script>
+</body>
+</html>

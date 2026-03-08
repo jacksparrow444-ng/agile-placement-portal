@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Portal | Placement Portal</title>
+    <link rel="stylesheet" href="company_interface.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="wrapper">
+        <div class="branding">
+            <h1>Company Portal</h1>
+            <p>Register your company to post jobs and find the best talent.</p>
+        </div>
+        <div class="form-section">
+            <div class="form-card">
+                <h2 id="formTitle">Company Registration</h2>
+                <form id="companyForm">
+                    <div class="form-row" id="nameRow">
+                        <input type="text" name="companyName" id="companyName" placeholder="Company Name" required>
+                    </div>
+                    <div class="form-row" id="hrRow">
+                        <input type="text" name="hrName" id="hrName" placeholder="HR Name" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="email" name="email" id="email" placeholder="Official Email" required>
+                    </div>
+                    <div class="form-row" id="contactRow">
+                        <input type="text" name="contact" id="contact" placeholder="Contact Number" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="password" name="password" id="password" placeholder="Password" required minlength="6">
+                    </div>
+                    <button type="submit" id="submitBtn" class="btn-primary">Register Company</button>
+                    <p class="toggle-text">Already registered? <a href="#" id="toggleLogin">Login here</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('companyForm');
+        const toggle = document.getElementById('toggleLogin');
+        let isLogin = false;
+
+        // Function to toggle between Login and Registration UI
+        toggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLogin = !isLogin;
+            
+            // Update UI Text
+            document.getElementById('formTitle').innerText = isLogin ? "Company Login" : "Company Registration";
+            document.getElementById('submitBtn').innerText = isLogin ? "Login" : "Register Company";
+            toggle.innerText = isLogin ? "Register here" : "Login here";
+            
+            // Show/Hide fields based on mode
+            const extraFields = ['nameRow', 'hrRow', 'contactRow'];
+            extraFields.forEach(id => document.getElementById(id).style.display = isLogin ? 'none' : 'block');
+            
+            // Toggle required attribute for hidden fields
+            document.querySelectorAll('input').forEach(input => { 
+                if(input.type !== 'email' && input.type !== 'password') {
+                    input.required = !isLogin; 
+                }
+            });
+        });
+
+        // Handle form submission and API call
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Determine API endpoint and role
+            const endpoint = isLogin ? '/api/login' : '/api/company/register';
+            if(isLogin) data.role = 'company';
+
+            try {
+                const response = await fetch(`http://localhost:3000${endpoint}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if(result.success) {
+                    if(isLogin) {
+                        // Store user session and redirect to dashboard
+                        localStorage.setItem('currentUser', JSON.stringify(result.user));
+                        window.location.href = 'company_dashboard.html';
+                    } else { 
+                        alert("Registration successful! Please login to continue."); 
+                        location.reload(); 
+                    }
+                } else { 
+                    alert("Error: " + result.message); 
+                }
+            } catch (err) {
+                alert("Connection failed! Please ensure the backend server is running.");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Portal | Placement Portal</title>
+<link rel="stylesheet" href="student_interface.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="branding">
+        <h1>Placement Portal</h1>
+        <p>Log in or register as a student to explore internship and placement opportunities.</p>
+    </div>
+
+    <div class="form-section">
+        <div class="form-card">
+            <h2 id="formTitle">Student Registration</h2>
+
+            <form id="studentForm">
+                <div class="form-row" id="nameRow">
+                    <input type="text" name="studentName" id="studentName" placeholder="Full Name" required>
+                </div>
+
+                <div class="form-row" id="rollRow">
+                    <input type="text" name="rollNumber" id="rollNumber" placeholder="Roll/Registration Number" required>
+                </div>
+
+                <div class="form-row" id="deptRow">
+                    <select name="department" id="department" required>
+                        <option value="" disabled selected>Select Department</option>
+                        <option value="CSE">Computer Science</option>
+                        <option value="IT">Information Technology</option>
+                        <option value="ECE">Electronics and Communication</option>
+                        <option value="EE">Electrical Engineering</option>
+                        <option value="ME">Mechanical Engineering</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <input type="email" name="email" id="email" placeholder="Institutional Email Address" required>
+                </div>
+
+                <div class="form-row" id="contactRow">
+                    <input type="text" name="contact" id="contact" placeholder="Contact Number" required>
+                </div>
+
+                <div class="form-row">
+                    <input type="password" name="password" id="password" placeholder="Password (Min 6 characters)" required minlength="6">
+                </div>
+
+                <div class="form-row checkbox-row" id="termsRow">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">I agree to the Terms & Conditions</label>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-primary">Register Student</button>
+
+                <p class="toggle-text">
+                    Already have an account? <a href="#" id="toggleLogin">Login here</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="successModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
+    <div class="modal-box" style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+        <h3>Success!</h3>
+        <p>Registration complete. You can now login.</p>
+        <button onclick="location.reload()" class="btn-primary">Continue</button>
+    </div>
+</div>
+
+<script>
+    const studentForm = document.getElementById('studentForm');
+    const formTitle = document.getElementById('formTitle');
+    const submitBtn = document.getElementById('submitBtn');
+    const toggleLogin = document.getElementById('toggleLogin');
+    let isLoginMode = false;
+
+    toggleLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        isLoginMode = !isLoginMode;
+        if (isLoginMode) {
+            formTitle.innerText = "Student Login";
+            submitBtn.innerText = "Login Student";
+            toggleLogin.innerText = "Register here";
+            document.getElementById('nameRow').style.display = 'none';
+            document.getElementById('rollRow').style.display = 'none';
+            document.getElementById('deptRow').style.display = 'none';
+            document.getElementById('contactRow').style.display = 'none';
+            document.getElementById('termsRow').style.display = 'none';
+            document.querySelectorAll('input, select').forEach(el => { if(el.id !== 'email' && el.id !== 'password') el.required = false; });
+        } else {
+            formTitle.innerText = "Student Registration";
+            submitBtn.innerText = "Register Student";
+            toggleLogin.innerText = "Login here";
+            document.getElementById('nameRow').style.display = 'block';
+            document.getElementById('rollRow').style.display = 'block';
+            document.getElementById('deptRow').style.display = 'block';
+            document.getElementById('contactRow').style.display = 'block';
+            document.getElementById('termsRow').style.display = 'block';
+            document.querySelectorAll('input, select').forEach(el => el.required = true);
+        }
+    });
+
+    studentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(studentForm);
+        const data = Object.fromEntries(formData.entries());
+        const endpoint = isLoginMode ? '/api/login' : '/api/student/register';
+        if (isLoginMode) data.role = 'student';
+
+        try {
+            const response = await fetch(`http://localhost:3000${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.success) {
+                if (isLoginMode) {
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    window.location.href = 'student_profile.html';
+                } else {
+                    document.getElementById('successModal').style.display = 'flex';
+                }
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch (err) {
+            alert("Server Error: Terminal mein 'node server.js' chalao!");
+        }
+    });
+</script>
+</body>
+</html>

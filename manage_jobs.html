@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Jobs | Company Portal</title>
+    <link rel="stylesheet" href="company_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>Company<span>Portal</span></h2>
+            <nav>
+                <a href="company_dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="post_job.html"><i class="fas fa-plus-circle"></i> Post New Job</a>
+                <a href="manage_jobs.html" class="active"><i class="fas fa-tasks"></i> Manage Jobs</a>
+                <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <header>
+                <h1>Manage Your Posted Jobs</h1>
+            </header>
+
+            <div class="content-card" style="background: white; padding: 20px; border-radius: 12px; margin-top: 20px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead style="background: #f8fafc; border-bottom: 2px solid #eee;">
+                        <tr>
+                            <th style="padding: 12px;">Job Title</th>
+                            <th>Location</th>
+                            <th>Salary</th>
+                            <th>Last Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jobTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <script>
+    async function loadMyJobs() {
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        // Session Check: Agar user nahi hai toh login pe bhejo
+        if (!user) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        try {
+            // Recruiter ID ke basis pe jobs mangwao
+            const response = await fetch(`http://localhost:3000/api/company/my-jobs/${user.id}`);
+            const data = await response.json();
+
+            const tableBody = document.getElementById('jobTableBody');
+            tableBody.innerHTML = '';
+
+            if (!data.jobs || data.jobs.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#64748b;">Abhi tak koi job post nahi ki gayi hai.</td></tr>';
+                return;
+            }
+
+            data.jobs.forEach(job => {
+                tableBody.innerHTML += `
+                    <tr style="border-bottom: 1px solid #f1f5f9; transition: 0.3s;">
+                        <td style="padding: 15px;">
+                            <div style="font-weight: 600; color: #1e293b;">${job.jobTitle}</div>
+                            <small style="color: #94a3b8;">Posted: ${job.postedDate}</small>
+                        </td>
+                        <td style="color: #475569;">${job.location}</td>
+                        <td style="color: #475569; font-weight: 500;">${job.salary}</td>
+                        <td style="color: #475569;">${job.lastDate}</td>
+                        <td>
+                            <button onclick="deleteJob(${job.id})" style="background:#fee2e2; color:#ef4444; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600;">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (err) { 
+            console.error("Jobs load nahi ho payi:", err); 
+        }
+    }
+
+    async function deleteJob(id) {
+        if (!confirm("Kya aap waqai is job ko delete karna chahte hain?")) return;
+        
+        try {
+            const res = await fetch(`http://localhost:3000/api/company/delete-job/${id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (result.success) {
+                loadMyJobs(); // List refresh karo
+            }
+        } catch (err) {
+            alert("Delete fail ho gaya. Server check karein.");
+        }
+    }
+
+    function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+    window.onload = loadMyJobs;
+</script>
+</body>
+</html>

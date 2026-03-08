@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TPO Staff Portal | Registration & Login</title>
+    <link rel="stylesheet" href="tpo_auth.css">
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="branding">
+        <h1>TPO Portal</h1>
+        <p>Manage placement drives, approve companies, and guide students towards their dream careers.</p>
+        <div class="branding-footer">
+            <p>Placement & Internship Cell</p>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <div class="form-card">
+            <h2 id="formTitle">TPO Staff Registration</h2>
+            <p class="subtitle" id="formSubtitle">Create your admin account to access the portal.</p>
+
+            <form id="tpoForm">
+                <div class="form-row" id="nameRow">
+                    <input type="text" id="tpoName" name="staffName" placeholder="Full Name" required>
+                </div>
+
+                <div class="form-row" id="idRow">
+                    <input type="text" id="staffId" name="staffID" placeholder="Staff ID / Employee ID" required>
+                </div>
+
+                <div class="form-row">
+                    <input type="email" id="tpoEmail" name="email" placeholder="Institutional Email (@college.edu)" required>
+                </div>
+
+                <div class="form-row" id="contactRow">
+                    <input type="text" id="tpoContact" name="contact" placeholder="Contact Number" required>
+                </div>
+
+                <div class="form-row">
+                    <input type="password" id="tpoPassword" name="password" placeholder="Password (Min 6 characters)" required minlength="6">
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-primary">
+                    Register as TPO
+                </button>
+
+                <p class="toggle-text">
+                    Already have an account? <a href="#" id="toggleLogin">Login here</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="successModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
+    <div class="modal-box" style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+        <h3 id="successTitle">Success!</h3>
+        <p id="successMsg">TPO Registration is complete. Please login.</p>
+        <button id="closeSuccessBtn" class="btn-primary" style="margin-top: 15px;" onclick="location.reload()">Continue</button>
+    </div>
+</div>
+
+<script>
+    const tpoForm = document.getElementById('tpoForm');
+    const formTitle = document.getElementById('formTitle');
+    const formSubtitle = document.getElementById('formSubtitle');
+    const submitBtn = document.getElementById('submitBtn');
+    const toggleLogin = document.getElementById('toggleLogin');
+    let isLoginMode = false;
+
+    // Toggle between Registration and Login modes
+    toggleLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        isLoginMode = !isLoginMode;
+
+        if (isLoginMode) {
+            formTitle.innerText = "TPO Staff Login";
+            formSubtitle.innerText = "Enter your credentials to access the admin dashboard.";
+            submitBtn.innerText = "Login as TPO";
+            toggleLogin.innerText = "Register here";
+            
+            // Hide registration-specific rows
+            document.getElementById('nameRow').style.display = 'none';
+            document.getElementById('idRow').style.display = 'none';
+            document.getElementById('contactRow').style.display = 'none';
+            
+            // Disable required validation for hidden fields
+            document.getElementById('tpoName').required = false;
+            document.getElementById('staffId').required = false;
+            document.getElementById('tpoContact').required = false;
+        } else {
+            formTitle.innerText = "TPO Staff Registration";
+            formSubtitle.innerText = "Create your admin account to access the portal.";
+            submitBtn.innerText = "Register as TPO";
+            toggleLogin.innerText = "Login here";
+            
+            // Show all registration rows
+            document.getElementById('nameRow').style.display = 'block';
+            document.getElementById('idRow').style.display = 'block';
+            document.getElementById('contactRow').style.display = 'block';
+            
+            // Enable required validation
+            document.getElementById('tpoName').required = true;
+            document.getElementById('staffId').required = true;
+            document.getElementById('tpoContact').required = true;
+        }
+    });
+
+    // Handle form submission and send data to the backend API
+    tpoForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(tpoForm);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Dynamic endpoint selection
+        const endpoint = isLoginMode ? '/api/login' : '/api/tpo/register';
+        if (isLoginMode) data.role = 'tpo';
+
+        try {
+            const response = await fetch(`http://localhost:3000${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                if (isLoginMode) {
+                    // Save user info to local storage and redirect to dashboard
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    window.location.href = 'tpo_dashboard.html';
+                } else {
+                    // Display success modal on registration
+                    document.getElementById('successModal').style.display = 'flex';
+                }
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch (err) {
+            alert("Connection Error: Ensure that server.js is running in the terminal.");
+        }
+    });
+</script>
+
+</body>
+</html>

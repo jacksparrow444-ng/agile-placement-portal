@@ -1,0 +1,148 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f4f7fe;
+    color: #333;
+}
+
+/* Dashboard Layout */
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 260px;
+    background-color: #1a237e; /* Deep Blue */
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+.sidebar h2 span {
+    color: #ffab40; /* Accent Orange */
+}
+
+.sidebar nav a {
+    display: block;
+    color: #c5cae9;
+    text-decoration: none;
+    padding: 12px 15px;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.sidebar nav a i {
+    margin-right: 10px;
+}
+
+.sidebar nav a:hover, .sidebar nav a.active {
+    background-color: #283593;
+    color: white;
+}
+
+/* Main Content Area */
+.content {
+    flex: 1;
+    padding: 30px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 22px;
+    color: #1a237e;
+}
+
+/* Status Pill */
+#statusPill {
+    padding: 6px 16px;
+    border-radius: 20px;
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Info Section & Stats */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stat-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card h3 {
+    font-size: 28px;
+    color: #1a237e;
+    margin-bottom: 5px;
+}
+
+.stat-card p {
+    color: #757575;
+    font-size: 14px;
+}
+
+/* Pending Message Styling */
+.pending-container {
+    background: #fff9e6;
+    border: 2px dashed #ffab40;
+    padding: 50px;
+    border-radius: 15px;
+    text-align: center;
+    margin-top: 40px;
+}
+
+.pending-container i {
+    font-size: 60px;
+    color: #ffab40;
+    margin-bottom: 20px;
+}
+
+.pending-container h2 {
+    color: #5d4037;
+    margin-bottom: 10px;
+}
+
+.pending-container p {
+    color: #795548;
+    max-width: 500px;
+    margin: 0 auto;
+}
