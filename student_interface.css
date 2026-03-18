@@ -59,11 +59,25 @@ body{
     overflow-y:auto;
 }
 
+/* FORM ROWS & LABELS */
+.form-row {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-row label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 14px;
+}
+
 /* INPUTS */
-input, select{
+input:not([type="checkbox"]), select{
     width:100%;
     padding:12px;
-    margin:8px 0;
+    margin-top:0;
     border-radius:15px;
     border:1px solid #ccc;
     transition:0.3s ease;
@@ -173,7 +187,7 @@ input:focus, select:focus{
 select {
     width: 100%;
     padding: 12px;
-    margin: 8px 0;
+    margin: 0;
     border-radius: 15px;
     border: 1px solid #ccc;
     transition: 0.3s ease;

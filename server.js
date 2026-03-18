@@ -64,7 +64,8 @@ db.serialize(() => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         studentName TEXT, rollNumber TEXT UNIQUE, department TEXT,
         email TEXT UNIQUE, contact TEXT, password TEXT,
-        cgpa REAL, passoutYear INTEGER, skills TEXT, github TEXT, resumePath TEXT
+        cgpa REAL, passoutYear INTEGER, skills TEXT, github TEXT, resumePath TEXT,
+        activeBacklogs INTEGER DEFAULT 0, status TEXT DEFAULT 'unverified'
     )`);
 
     // 4.2 Companies Table
@@ -86,7 +87,7 @@ db.serialize(() => {
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
         companyId INTEGER,
         jobTitle TEXT, jobDescription TEXT, salary TEXT, location TEXT, 
-        eligibility TEXT, skills TEXT, lastDate TEXT, 
+        eligibility TEXT, skills TEXT, lastDate TEXT, maxBacklogs INTEGER DEFAULT 0,
         status TEXT DEFAULT 'active', postedDate DATE DEFAULT CURRENT_DATE
     )`);
 
@@ -145,11 +146,11 @@ app.post('/api/login', (req, res) => {
 
 // Upload Resume & Update Profile
 app.post('/api/student/upload-resume', upload.single('resume'), (req, res) => {
-    const { studentId, department, cgpa, passoutYear, skills, github } = req.body;
+    const { studentId, department, cgpa, passoutYear, skills, github, activeBacklogs } = req.body;
     let resumePath = req.file ? req.file.path : null;
 
-    let sql = `UPDATE students SET department=?, cgpa=?, passoutYear=?, skills=?, github=?, resumePath=COALESCE(?, resumePath) WHERE id=?`;
-    db.run(sql, [department, parseFloat(cgpa), passoutYear, skills, github, resumePath, studentId], function(err) {
+    let sql = `UPDATE students SET department=?, cgpa=?, passoutYear=?, skills=?, github=?, activeBacklogs=?, resumePath=COALESCE(?, resumePath) WHERE id=?`;
+    db.run(sql, [department, parseFloat(cgpa), passoutYear, skills, github, parseInt(activeBacklogs) || 0, resumePath, studentId], function(err) {
         if (err) return res.status(500).json({ success: false, message: "Failed to update profile." });
         res.json({ success: true, message: "Profile & Resume updated successfully!" });
     });
@@ -185,7 +186,7 @@ app.post('/api/student/apply', (req, res) => {
         return res.status(400).json({ success: false, message: "IDs are missing!" });
     }
 
-    db.get(`SELECT s.cgpa, j.eligibility FROM students s, jobs j WHERE s.id = ? AND j.id = ?`, 
+    db.get(`SELECT s.cgpa, s.activeBacklogs, j.eligibility, j.maxBacklogs FROM students s, jobs j WHERE s.id = ? AND j.id = ?`, 
     [studentId, jobId], (err, row) => {
         if (err) {
             console.log("❌ DATABASE ERROR:", err.message);
@@ -201,10 +202,17 @@ app.post('/api/student/apply', (req, res) => {
 
         const studentCGPA = parseFloat(row.cgpa) || 0;
         const requiredCGPA = parseFloat(row.eligibility) || 0;
+        const studentBacklogs = parseInt(row.activeBacklogs) || 0;
+        const allowedBacklogs = parseInt(row.maxBacklogs) || 0;
 
         if (studentCGPA < requiredCGPA) {
             console.log(`⚠️ REJECTED: Student CGPA (${studentCGPA}) < Required (${requiredCGPA})`);
             return res.status(400).json({ success: false, message: `Need ${requiredCGPA} CGPA, you have ${studentCGPA}.` });
+        }
+
+        if (studentBacklogs > allowedBacklogs) {
+            console.log(`⚠️ REJECTED: Student Backlogs (${studentBacklogs}) > Allowed (${allowedBacklogs})`);
+            return res.status(400).json({ success: false, message: `Maximum ${allowedBacklogs} active backlogs allowed, you have ${studentBacklogs}.` });
         }
 
         db.run(`INSERT INTO applications (studentId, jobId, coverLetter) VALUES (?, ?, ?)`, 
@@ -240,10 +248,10 @@ app.get('/api/student/my-applications/:id', (req, res) => {
 
 // Post a New Job
 app.post('/api/company/post-job', (req, res) => {
-    const { companyId, jobTitle, jobDescription, salary, location, eligibility, skills, lastDate } = req.body;
-    const sql = `INSERT INTO jobs (companyId, jobTitle, jobDescription, salary, location, eligibility, skills, lastDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    const { companyId, jobTitle, jobDescription, salary, location, eligibility, maxBacklogs, skills, lastDate } = req.body;
+    const sql = `INSERT INTO jobs (companyId, jobTitle, jobDescription, salary, location, eligibility, maxBacklogs, skills, lastDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     
-    db.run(sql, [companyId, jobTitle, jobDescription, salary, location, eligibility, skills, lastDate], function(err) {
+    db.run(sql, [companyId, jobTitle, jobDescription, salary, location, eligibility, parseInt(maxBacklogs) || 0, skills, lastDate], function(err) {
         if (err) return res.status(500).json({ success: false, message: "Failed to post job." });
         res.json({ success: true, message: "Job Posted Successfully!" });
     });
@@ -269,7 +277,7 @@ app.delete('/api/company/delete-job/:id', (req, res) => {
 app.get('/api/company/view-applicants/:jobId', (req, res) => {
     const sql = `
         SELECT a.id as applicationId, a.coverLetter, a.status, a.appliedDate, 
-               s.studentName, s.email, s.cgpa, s.skills, s.resumePath 
+               s.studentName, s.email, s.cgpa, s.skills, s.resumePath, s.activeBacklogs 
         FROM applications a 
         JOIN students s ON a.studentId = s.id 
         WHERE a.jobId = ?
@@ -311,6 +319,23 @@ app.get('/api/tpo/pending-companies', (req, res) => {
     });
 });
 
+// Get Pending Students for Verification
+app.get('/api/tpo/pending-students', (req, res) => {
+    db.all(`SELECT * FROM students WHERE status = 'unverified'`, (err, rows) => {
+        if (err) return res.status(500).json({ success: false });
+        res.json({ success: true, students: rows || [] });
+    });
+});
+
+// Verify Student (Approve/Reject)
+app.post('/api/tpo/verify-student', (req, res) => {
+    const { studentId, action } = req.body;
+    db.run(`UPDATE students SET status = ? WHERE id = ?`, [action, studentId], function(err) {
+        if (err) return res.status(500).json({ success: false });
+        res.json({ success: true, message: "Student status updated." });
+    });
+});
+
 // Verify Company (Approve/Reject)
 app.post('/api/tpo/verify-company', (req, res) => {
     const { companyId, action } = req.body;
@@ -341,7 +366,7 @@ app.post('/api/tpo/update-drive-status', (req, res) => {
 app.get('/api/tpo/stats', (req, res) => {
     db.get(`SELECT COUNT(*) as s FROM students`, (err, r1) => {
         db.get(`SELECT COUNT(*) as c FROM companies WHERE status='verified'`, (err, r2) => {
-            db.get(`SELECT COUNT(*) as a FROM applications WHERE status='approved'`, (err, r3) => {
+            db.get(`SELECT COUNT(*) as a FROM applications WHERE status='hired'`, (err, r3) => {
                 res.json({ 
                     success: true, 
                     totalStudents: r1 ? r1.s : 0, 
@@ -350,6 +375,23 @@ app.get('/api/tpo/stats', (req, res) => {
                 });
             });
         });
+    });
+});
+
+// Drive Analytics
+app.get('/api/tpo/drive-analytics', (req, res) => {
+    const sql = `
+        SELECT j.id, j.jobTitle, c.companyName,
+               (SELECT COUNT(*) FROM applications WHERE jobId = j.id) as totalApps,
+               (SELECT COUNT(*) FROM applications WHERE jobId = j.id AND status = 'shortlisted') as shortlistedApps,
+               (SELECT COUNT(*) FROM applications WHERE jobId = j.id AND status = 'hired') as hiredApps
+        FROM jobs j
+        JOIN companies c ON j.companyId = c.id
+        ORDER BY j.id DESC
+    `;
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ success: false });
+        res.json({ success: true, analytics: rows || [] });
     });
 });
 

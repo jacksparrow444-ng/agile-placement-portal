@@ -73,6 +73,9 @@
                         <td style="color: #475569; font-weight: 500;">${job.salary}</td>
                         <td style="color: #475569;">${job.lastDate}</td>
                         <td>
+                            <a href="view_applicants.html?jobId=${job.id}" style="background:#e0f2fe; color:#0369a1; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600; text-decoration: none; margin-right: 5px; display: inline-block;">
+                                <i class="fas fa-users"></i> Applicants
+                            </a>
                             <button onclick="deleteJob(${job.id})" style="background:#fee2e2; color:#ef4444; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600;">
                                 <i class="fas fa-trash-alt"></i> Delete
                             </button>

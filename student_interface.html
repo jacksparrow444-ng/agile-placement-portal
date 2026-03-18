@@ -22,14 +22,17 @@
 
             <form id="studentForm">
                 <div class="form-row" id="nameRow">
-                    <input type="text" name="studentName" id="studentName" placeholder="Full Name" required>
+                    <label for="studentName">Full Name</label>
+                    <input type="text" name="studentName" id="studentName" placeholder="Enter your full name" required pattern="[A-Za-z\s]+" title="Only alphabets and spaces are allowed">
                 </div>
 
                 <div class="form-row" id="rollRow">
-                    <input type="text" name="rollNumber" id="rollNumber" placeholder="Roll/Registration Number" required>
+                    <label for="rollNumber">Roll / Registration Number</label>
+                    <input type="text" name="rollNumber" id="rollNumber" placeholder="Enter Roll Number" required pattern="[a-zA-Z0-9]+" title="Only letters and numbers are allowed without spaces">
                 </div>
 
                 <div class="form-row" id="deptRow">
+                    <label for="department">Department</label>
                     <select name="department" id="department" required>
                         <option value="" disabled selected>Select Department</option>
                         <option value="CSE">Computer Science</option>
@@ -40,21 +43,24 @@
                     </select>
                 </div>
 
-                <div class="form-row">
-                    <input type="email" name="email" id="email" placeholder="Institutional Email Address" required>
+                <div class="form-row" id="emailRow">
+                    <label for="email">Institutional Email Address</label>
+                    <input type="email" name="email" id="email" placeholder="Enter Email Address" required>
                 </div>
 
                 <div class="form-row" id="contactRow">
-                    <input type="text" name="contact" id="contact" placeholder="Contact Number" required>
+                    <label for="contact">Contact Number</label>
+                    <input type="text" name="contact" id="contact" placeholder="Enter Contact Number" required>
                 </div>
 
-                <div class="form-row">
-                    <input type="password" name="password" id="password" placeholder="Password (Min 6 characters)" required minlength="6">
+                <div class="form-row" id="passwordRow">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password" placeholder="Enter Password (Min 6 characters)" required minlength="6">
                 </div>
 
                 <div class="form-row checkbox-row" id="termsRow">
                     <input type="checkbox" id="terms" required>
-                    <label for="terms">I agree to the Terms & Conditions</label>
+                    <label for="terms" style="display: inline-block; font-weight: 500; font-size: 14px; margin-bottom: 0;">I agree to the Terms & Conditions</label>
                 </div>
 
                 <button type="submit" id="submitBtn" class="btn-primary">Register Student</button>
@@ -71,7 +77,7 @@
     <div class="modal-box" style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
         <h3>Success!</h3>
         <p>Registration complete. You can now login.</p>
-        <button onclick="location.reload()" class="btn-primary">Continue</button>
+        <button onclick="switchToLoginAndCloseModal()" class="btn-primary">Continue to Login</button>
     </div>
 </div>
 
@@ -81,6 +87,33 @@
     const submitBtn = document.getElementById('submitBtn');
     const toggleLogin = document.getElementById('toggleLogin');
     let isLoginMode = false;
+
+    function switchToLoginAndCloseModal() {
+        document.getElementById('successModal').style.display = 'none';
+        
+        // Auto-switch to login mode
+        isLoginMode = true;
+        formTitle.innerText = "Student Login";
+        submitBtn.innerText = "Login Student";
+        toggleLogin.innerText = "Register here";
+        
+        document.getElementById('nameRow').style.display = 'none';
+        document.getElementById('rollRow').style.display = 'none';
+        document.getElementById('deptRow').style.display = 'none';
+        document.getElementById('contactRow').style.display = 'none';
+        document.getElementById('termsRow').style.display = 'none';
+        
+        // Clear all inputs except email (so user doesn't have to retype it)
+        document.getElementById('studentName').value = '';
+        document.getElementById('rollNumber').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('department').value = '';
+        document.getElementById('contact').value = '';
+        
+        document.querySelectorAll('input, select').forEach(el => { 
+            if(el.id !== 'email' && el.id !== 'password') el.required = false; 
+        });
+    }
 
     toggleLogin.addEventListener('click', (e) => {
         e.preventDefault();

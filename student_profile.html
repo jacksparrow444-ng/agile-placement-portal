@@ -154,6 +154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 document.getElementById('branch').value = s.department || "";
                 document.getElementById('cgpa').value = s.cgpa || "";
                 document.getElementById('passoutYear').value = s.passoutYear || 2026;
+                document.getElementById('backlogs').value = s.activeBacklogs || "0";
                 document.getElementById('skills').value = s.skills || "";
                 document.getElementById('github').value = s.github || "";
             }
@@ -204,6 +205,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         formData.append('department', document.getElementById('branch').value);
         formData.append('cgpa', document.getElementById('cgpa').value);
         formData.append('passoutYear', document.getElementById('passoutYear').value);
+        formData.append('activeBacklogs', document.getElementById('backlogs').value);
         formData.append('skills', document.getElementById('skills').value);
         formData.append('github', document.getElementById('github').value);
         

@@ -19,6 +19,7 @@
             <a href="tpo_dashboard.html" class="nav-item active"><i class="fas fa-chart-line"></i> Overview</a>
             <a href="tpo_manage_drives.html" class="nav-item"><i class="fas fa-bullhorn"></i> Manage Drives</a>
             <a href="tpo_requests.html" class="nav-item"><i class="fas fa-building-circle-check"></i> Company Requests</a>
+            <a href="tpo_student_verify.html" class="nav-item"><i class="fas fa-user-check"></i> Student Verification</a>
             <a href="#" class="nav-item"><i class="fas fa-poll-h"></i> Publish Results</a>
         </nav>
         <div class="sidebar-footer">
@@ -136,38 +137,45 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    // 3. Load Recent Company Requests in Activity List (User Story #46)
-    async function fetchRecentActivity() {
+    // 3. Load Drive Analytics in Activity List (User Story #27)
+    async function fetchDriveAnalytics() {
         try {
-            const response = await fetch('http://localhost:3000/api/tpo/pending-requests');
+            const response = await fetch('http://localhost:3000/api/tpo/drive-analytics');
             const data = await response.json();
             const list = document.getElementById('activityList');
             
-            if (data.success && data.companies.length > 0) {
+            if (data.success && data.analytics.length > 0) {
                 let html = '';
-                // Sirf last 3 requests dikhayenge Overview par
-                data.companies.slice(0, 3).forEach(comp => {
+                data.analytics.slice(0, 4).forEach(drive => {
+                    const progress = drive.totalApps > 0 ? Math.round((drive.hiredApps / drive.totalApps) * 100) : 0;
                     html += `
-                        <div class="activity-item">
-                            <div class="act-icon"><i class="fas fa-building"></i></div>
-                            <div class="act-text">
-                                <strong>New Request:</strong> ${comp.companyName} is waiting for verification.
-                                <small>Pending Approval</small>
+                        <div class="activity-item" style="flex-direction: column; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <div style="font-size: 14px; font-weight: 600; color: #1e293b;">${drive.companyName} - ${drive.jobTitle}</div>
+                                <div style="font-size: 12px; color: #64748b; font-weight: 500;">${progress}% Hired</div>
+                            </div>
+                            <div style="width: 100%; background: #e2e8f0; height: 6px; border-radius: 3px; overflow: hidden;">
+                                <div style="height: 100%; background: #10b981; width: ${progress}%;"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-top: 2px;">
+                                <span>Total Apps: <strong>${drive.totalApps}</strong></span>
+                                <span>Shortlisted: <strong style="color: #3b82f6;">${drive.shortlistedApps}</strong></span>
+                                <span>Hired: <strong style="color: #10b981;">${drive.hiredApps}</strong></span>
                             </div>
                         </div>`;
                 });
                 list.innerHTML = html;
             } else {
-                list.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No new requests recently.</p>';
+                list.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No active drive data available.</p>';
             }
         } catch (err) {
-            console.error("Activity fetch error:", err);
+            console.error("Analytics fetch error:", err);
         }
     }
 
     // Initial Load
     fetchStats();
-    fetchRecentActivity();
+    fetchDriveAnalytics();
 });
 </script>
 

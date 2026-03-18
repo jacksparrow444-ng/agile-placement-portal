@@ -1,0 +1,22 @@
+TASK ID,TASK NAME,SPRINT #,ASSIGNED TO,START,FINISH,Done,Done,PRIORITY,STATUS,STORY POINTS,Done
+7,User Story #7 - Student Job Application Flow,Sprint 3,"Tanish, Nirmal",16/03/2026,18/03/2026,Yes,Yes,High,Complete,8,Yes
+7.1,UI for Apply Button & Confirmation Modal,Sprint 3,Tanish,16/03/2026,16/03/2026,Yes,Yes,High,Complete,2,Yes
+7.2,Backend Logic for Eligibility Check (CGPA/Backlogs),Sprint 3,Nirmal,16/03/2026,17/03/2026,Yes,Yes,High,Complete,3,Yes
+7.3,Submit Application & Update Database API,Sprint 3,Nirmal,17/03/2026,18/03/2026,Yes,Yes,High,Complete,2,Yes
+7.4,Test Student Application Flow,Sprint 3,Tinesh,18/03/2026,18/03/2026,Yes,Yes,High,Complete,1,Yes
+18,User Story #18 - Company View Applicants,Sprint 3,"Aman, Nirmal",18/03/2026,20/03/2026,Yes,Yes,High,Complete,5,Yes
+18.1,Applicant Tracking Table UI for Companies,Sprint 3,Aman,18/03/2026,19/03/2026,Yes,Yes,High,Complete,2,Yes
+18.2,Fetch Applicant Data & Resume Link API,Sprint 3,Nirmal,18/03/2026,19/03/2026,Yes,Yes,High,Complete,2,Yes
+18.3,Test Applicant Tracking UI & API,Sprint 3,Tinesh,20/03/2026,20/03/2026,Yes,Yes,High,Complete,1,Yes
+19,User Story #19 - Update Applicant Status,Sprint 3,"Aman, Nirmal",20/03/2026,24/03/2026,Yes,Yes,High,Complete,5,Yes
+19.1,UI Controls for Status (Shortlist/Reject/Hired),Sprint 3,Aman,20/03/2026,23/03/2026,Yes,Yes,High,Complete,2,Yes
+19.2,Update Application Status API,Sprint 3,Nirmal,23/03/2026,24/03/2026,Yes,Yes,High,Complete,2,Yes
+19.3,Test Status Update Workflow,Sprint 3,Tinesh,24/03/2026,24/03/2026,Yes,Yes,High,Complete,1,Yes
+26,User Story #26 - TPO Student Profile Verification,Sprint 3,"Tanish, Nirmal",24/03/2026,26/03/2026,Yes,Yes,High,Complete,5,Yes
+26.1,TPO Verification Dashboard UI,Sprint 3,Tanish,24/03/2026,25/03/2026,Yes,Yes,High,Complete,2,Yes
+26.2,Approve/Reject Student Profile API,Sprint 3,Nirmal,24/03/2026,25/03/2026,Yes,Yes,High,Complete,2,Yes
+26.3,Test TPO Verification Flow,Sprint 3,Tinesh,26/03/2026,26/03/2026,Yes,Yes,High,Complete,1,Yes
+27,User Story #27 - TPO View Drive Analytics,Sprint 3,"Tanish, Nirmal",26/03/2026,27/03/2026,Yes,Yes,Medium,Complete,3,Yes
+27.1,Company & Drive Progress Overview UI,Sprint 3,Tanish,26/03/2026,26/03/2026,Yes,Yes,Medium,Complete,1,Yes
+27.2,Analytics/Stats Fetch API,Sprint 3,Nirmal,26/03/2026,27/03/2026,Yes,Yes,Medium,Complete,1,Yes
+27.3,Test TPO Analytics Dashboard,Sprint 3,Tinesh,27/03/2026,27/03/2026,Yes,Yes,Medium,Complete,1,Yes
