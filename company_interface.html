@@ -18,19 +18,24 @@
                 <h2 id="formTitle">Company Registration</h2>
                 <form id="companyForm">
                     <div class="form-row" id="nameRow">
-                        <input type="text" name="companyName" id="companyName" placeholder="Company Name" required>
+                        <label for="companyName">Company Name</label>
+                        <input type="text" name="companyName" id="companyName" placeholder="Enter Company Name" required pattern="^[A-Za-z0-9\s\.\&]+$" title="Company Name (Alphanumeric, spaces, ., & allowed)" oninput="this.value = this.value.replace(/[<>{}=\*]/g, '')">
                     </div>
                     <div class="form-row" id="hrRow">
-                        <input type="text" name="hrName" id="hrName" placeholder="HR Name" required>
+                        <label for="hrName">HR Name</label>
+                        <input type="text" name="hrName" id="hrName" placeholder="Enter HR Name" required pattern="^[A-Za-z\s]+$" title="Only alphabets and spaces allowed" oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, '')">
                     </div>
-                    <div class="form-row">
-                        <input type="email" name="email" id="email" placeholder="Official Email" required>
+                    <div class="form-row" id="emailRow">
+                        <label for="email">Official Corporate Email</label>
+                        <input type="email" name="email" id="email" placeholder="e.g. name@company.com" required pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" title="Must be a valid professional email format">
                     </div>
                     <div class="form-row" id="contactRow">
-                        <input type="text" name="contact" id="contact" placeholder="Contact Number" required>
+                        <label for="contact">Contact Number</label>
+                        <input type="text" name="contact" id="contact" placeholder="10-digit Contact Number" required pattern="^[0-9]{10}$" title="Strictly 10 digit number">
                     </div>
-                    <div class="form-row">
-                        <input type="password" name="password" id="password" placeholder="Password" required minlength="6">
+                    <div class="form-row" id="passwordRow">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" id="password" placeholder="Enter Password (Min 8 chars)" required minlength="8" pattern="^[^'&quot;=<>;\\]+$" title="Minimum 8 characters. Special injection symbols not allowed.">
                     </div>
                     <button type="submit" id="submitBtn" class="btn-primary">Register Company</button>
                     <p class="toggle-text">Already registered? <a href="#" id="toggleLogin">Login here</a></p>

@@ -128,16 +128,52 @@ app.post('/api/:role/register', (req, res) => {
     });
 });
 
-// Login (Role Based)
+// Login (Role Based) with Strict Backend Validation
 app.post('/api/login', (req, res) => {
-    const { email, password, role } = req.body;
-    let table = role === 'tpo' ? 'tpo' : (role === 'student' ? 'students' : 'companies');
+    const { email, staffID, password, role } = req.body;
     
-    db.get(`SELECT * FROM ${table} WHERE email = ? AND password = ?`, [email, password], (err, row) => {
-        if (err || !row) return res.status(401).json({ success: false, message: "Invalid Credentials" });
-        delete row.password; // Remove password before sending to frontend
-        res.json({ success: true, user: row, role: role });
-    });
+    // Strict Password Validation (preventing SQL injection payloads)
+    if (!password || /['"=<>;\\]/.test(password)) {
+        return res.status(400).json({ success: false, message: "Invalid password format. Special injection characters not allowed." });
+    }
+
+    if (role === 'student') {
+        // Must be a valid email
+        if (!email || !/^[\w\.-]+@[\w\.-]+\.\w{2,}$/.test(email)) {
+            return res.status(400).json({ success: false, message: "Invalid College Email format." });
+        }
+        if (password.length < 8) {
+            return res.status(400).json({ success: false, message: "Student password must be at least 8 characters." });
+        }
+        db.get(`SELECT * FROM students WHERE email = ? AND password = ?`, [email, password], (err, row) => {
+            if (err || !row) return res.status(401).json({ success: false, message: "Invalid Credentials" });
+            delete row.password;
+            res.json({ success: true, user: row, role: role });
+        });
+    } else if (role === 'company') {
+        // Professional email format explicitly checked
+        if (!email || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+            return res.status(400).json({ success: false, message: "Use a valid professional email (e.g., name@company.com)." });
+        }
+        db.get(`SELECT * FROM companies WHERE email = ? AND password = ?`, [email, password], (err, row) => {
+            if (err || !row) return res.status(401).json({ success: false, message: "Invalid Credentials" });
+            delete row.password;
+            res.json({ success: true, user: row, role: role });
+        });
+    } else if (role === 'tpo') {
+        // TPO strictly uses Placement Cell ID which maps to staffID in db
+        // Frontend will send staffID during login instead of email
+        if (!staffID || !/^[A-Za-z0-9]{10,15}$/.test(staffID)) {
+            return res.status(400).json({ success: false, message: "Placement Cell ID must be strictly alphanumeric (10-15 chars). No spaces or specials." });
+        }
+        db.get(`SELECT * FROM tpo WHERE staffID = ? AND password = ?`, [staffID, password], (err, row) => {
+            if (err || !row) return res.status(401).json({ success: false, message: "Invalid Credentials" });
+            delete row.password;
+            res.json({ success: true, user: row, role: role });
+        });
+    } else {
+        return res.status(400).json({ success: false, message: "Invalid role specified." });
+    }
 });
 
 // ==========================================

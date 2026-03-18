@@ -24,23 +24,28 @@
 
             <form id="tpoForm">
                 <div class="form-row" id="nameRow">
-                    <input type="text" id="tpoName" name="staffName" placeholder="Full Name" required>
+                    <label for="tpoName">Full Name</label>
+                    <input type="text" id="tpoName" name="staffName" placeholder="Full Name" required pattern="^[A-Za-z\s]+$" title="Only alphabets and spaces allowed">
                 </div>
 
                 <div class="form-row" id="idRow">
-                    <input type="text" id="staffId" name="staffID" placeholder="Staff ID / Employee ID" required>
+                    <label for="staffId">Placement Cell ID</label>
+                    <input type="text" id="staffId" name="staffID" placeholder="Placement Cell ID (e.g. TPO123)" required pattern="^[A-Za-z0-9]{10,15}$" title="Strictly alphanumeric ONLY (10-15 chars). NO spaces, specials, or emails." maxlength="15" oninput="this.value = this.value.replace(/[^A-Za-z0-9]/g, '')">
                 </div>
 
-                <div class="form-row">
-                    <input type="email" id="tpoEmail" name="email" placeholder="Institutional Email (@college.edu)" required>
+                <div class="form-row" id="emailRow">
+                    <label for="tpoEmail">Institutional Email</label>
+                    <input type="email" id="tpoEmail" name="email" placeholder="Institutional Email (@college.edu)" required pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" title="Must be a valid professional email format">
                 </div>
 
                 <div class="form-row" id="contactRow">
-                    <input type="text" id="tpoContact" name="contact" placeholder="Contact Number" required>
+                    <label for="tpoContact">Contact Number</label>
+                    <input type="text" id="tpoContact" name="contact" placeholder="Contact Number" required pattern="^[0-9]{10}$" title="Strictly 10 digit number">
                 </div>
 
-                <div class="form-row">
-                    <input type="password" id="tpoPassword" name="password" placeholder="Password (Min 6 characters)" required minlength="6">
+                <div class="form-row" id="passwordRow">
+                    <label for="tpoPassword">Password</label>
+                    <input type="password" id="tpoPassword" name="password" placeholder="Password (Min 8 chars)" required minlength="8" pattern="^[^'&quot;=<>;\\]+$" title="Minimum 8 characters. Special injection symbols not allowed.">
                 </div>
 
                 <button type="submit" id="submitBtn" class="btn-primary">
@@ -84,13 +89,17 @@
             
             // Hide registration-specific rows
             document.getElementById('nameRow').style.display = 'none';
-            document.getElementById('idRow').style.display = 'none';
+            document.getElementById('emailRow').style.display = 'none'; // Email hidden during login
             document.getElementById('contactRow').style.display = 'none';
+            
+            // Show ID row for login
+            document.getElementById('idRow').style.display = 'block';
             
             // Disable required validation for hidden fields
             document.getElementById('tpoName').required = false;
-            document.getElementById('staffId').required = false;
+            document.getElementById('tpoEmail').required = false;
             document.getElementById('tpoContact').required = false;
+            document.getElementById('staffId').required = true;
         } else {
             formTitle.innerText = "TPO Staff Registration";
             formSubtitle.innerText = "Create your admin account to access the portal.";
@@ -100,11 +109,13 @@
             // Show all registration rows
             document.getElementById('nameRow').style.display = 'block';
             document.getElementById('idRow').style.display = 'block';
+            document.getElementById('emailRow').style.display = 'block'; // Added back
             document.getElementById('contactRow').style.display = 'block';
             
             // Enable required validation
             document.getElementById('tpoName').required = true;
             document.getElementById('staffId').required = true;
+            document.getElementById('tpoEmail').required = true;
             document.getElementById('tpoContact').required = true;
         }
     });

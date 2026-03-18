@@ -75,11 +75,25 @@ body {
     font-size: 14px;
 }
 
+/* FORM ROWS & LABELS */
+.form-row {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-row label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #003366;
+    font-size: 14px;
+}
+
 /* Inputs */
 input {
     width: 100%;
     padding: 14px;
-    margin: 10px 0;
+    margin-top: 0;
     border-radius: 12px;
     border: 1px solid #ccc;
     background: #f9fbfc;

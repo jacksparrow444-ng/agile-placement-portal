@@ -58,11 +58,25 @@ body{
     background:white;
 }
 
+/* FORM ROWS & LABELS */
+.form-row {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-row label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #003366;
+    font-size: 14px;
+}
+
 /* INPUTS */
 input{
     width:100%;
     padding:12px;
-    margin:12px 0;
+    margin-top:0;
     border-radius:15px;
     border:1px solid #ccc;
     transition:0.3s ease;
