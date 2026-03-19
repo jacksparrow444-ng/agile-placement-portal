@@ -113,6 +113,16 @@ app.post('/api/:role/register', (req, res) => {
     const userData = req.body;
     let table = role === 'tpo' ? 'tpo' : (role === 'student' ? 'students' : 'companies');
     
+    // STRICT BACKEND VALIDATION FOR REGISTRATION
+    if (!userData.password || userData.password.length < 8 || /['"=<>;\\]/.test(userData.password)) {
+        return res.status(400).json({ success: false, message: "Password must be at least 8 characters and contain no SQL injection symbols." });
+    }
+
+    // Contact Number Validation (Starts with 6-9 and exactly 10 digits)
+    if (userData.contact && !/^[6-9]\d{9}$/.test(userData.contact)) {
+        return res.status(400).json({ success: false, message: "Contact number must be exactly 10 digits and start with 6-9." });
+    }
+
     // Companies need TPO verification
     if(role === 'company') userData.status = 'unverified';
 
@@ -123,7 +133,14 @@ app.post('/api/:role/register', (req, res) => {
     const sql = `INSERT INTO ${table} (${columns}) VALUES (${placeholders})`;
 
     db.run(sql, values, function(err) {
-        if (err) return res.status(400).json({ success: false, message: "Email/ID already exists! Try another." });
+        if (err) {
+            console.error("❌ SQL INSERT ERROR:", err.message);
+            console.error("Table:", table, "Data:", userData);
+            if (err.message.includes("SQLITE_BUSY")) {
+                return res.status(500).json({ success: false, message: "Database is locked by DB Browser. Please click 'Write Changes' and close it." });
+            }
+            return res.status(400).json({ success: false, message: "Email/ID already exists! Try another." });
+        }
         res.json({ success: true, message: "Registered Successfully!" });
     });
 });
@@ -428,6 +445,37 @@ app.get('/api/tpo/drive-analytics', (req, res) => {
     db.all(sql, [], (err, rows) => {
         if (err) return res.status(500).json({ success: false });
         res.json({ success: true, analytics: rows || [] });
+    });
+});
+
+// ==========================================
+// 8.5 PUBLIC APIs (Landing Page)
+// ==========================================
+
+// Public Dashboard Stats for Landing Page (index.html)
+app.get('/api/public/stats', (req, res) => {
+    // 1. Get total verified companies
+    db.get(`SELECT COUNT(*) as c FROM companies WHERE status='verified'`, (err, r1) => {
+        // 2. Get total placed students (distinct students hired)
+        db.get(`SELECT COUNT(DISTINCT studentId) as s FROM applications WHERE status='hired'`, (err, r2) => {
+            // 3. Get total active internships
+            db.get(`SELECT COUNT(*) as j FROM jobs WHERE status='active'`, (err, r3) => {
+                // 4. Get total students for placement rate computation
+                db.get(`SELECT COUNT(*) as total FROM students`, (err, r4) => {
+                    let total = r4 ? r4.total : 0;
+                    let placed = r2 ? r2.s : 0;
+                    let rate = total > 0 ? Math.round((placed / total) * 100) : 0;
+                    // Provide defaults so the page never looks broken, even on an empty DB
+                    res.json({ 
+                        success: true, 
+                        companiesOnboard: r1 && r1.c > 0 ? r1.c : 0, 
+                        studentsPlaced: placed > 0 ? placed : 0, 
+                        activeInternships: r3 && r3.j > 0 ? r3.j : 0, 
+                        placementRate: rate > 0 ? rate : 0
+                    });
+                });
+            });
+        });
     });
 });
 

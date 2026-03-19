@@ -12,30 +12,51 @@
         <div class="branding">
             <h1>Company Portal</h1>
             <p>Register your company to post jobs and find the best talent.</p>
+
+            <div class="login-marquee">
+                <div class="marquee-track">
+                    <div class="marquee-item"><i class="fab fa-google"></i> Google</div>
+                    <div class="marquee-item"><i class="fab fa-microsoft"></i> Microsoft</div>
+                    <div class="marquee-item"><i class="fab fa-amazon"></i> Amazon</div>
+                    <div class="marquee-item"><i class="fas fa-laptop-code"></i> TCS</div>
+                    <div class="marquee-item"><i class="fas fa-network-wired"></i> Infosys</div>
+                    <!-- Duplicate for seamless loop -->
+                    <div class="marquee-item"><i class="fab fa-google"></i> Google</div>
+                    <div class="marquee-item"><i class="fab fa-microsoft"></i> Microsoft</div>
+                    <div class="marquee-item"><i class="fab fa-amazon"></i> Amazon</div>
+                    <div class="marquee-item"><i class="fas fa-laptop-code"></i> TCS</div>
+                    <div class="marquee-item"><i class="fas fa-network-wired"></i> Infosys</div>
+                </div>
+            </div>
         </div>
         <div class="form-section">
             <div class="form-card">
                 <h2 id="formTitle">Company Registration</h2>
-                <form id="companyForm">
+                <form id="companyForm" novalidate>
                     <div class="form-row" id="nameRow">
                         <label for="companyName">Company Name</label>
-                        <input type="text" name="companyName" id="companyName" placeholder="Enter Company Name" required pattern="^[A-Za-z0-9\s\.\&]+$" title="Company Name (Alphanumeric, spaces, ., & allowed)" oninput="this.value = this.value.replace(/[<>{}=\*]/g, '')">
+                        <input type="text" name="companyName" id="companyName" placeholder="Enter Company Name" required pattern="^[A-Za-z0-9\s\.\&]+$" title="Company Name (Alphanumeric, spaces, ., & allowed)" oninput="this.value = this.value.replace(/[<>{}=\*]/g, ''); document.getElementById('companyNameError').style.display='none'">
+                        <span class="error-msg" id="companyNameError">Invalid Company Name. Special chars like < > { } = * not allowed.</span>
                     </div>
                     <div class="form-row" id="hrRow">
                         <label for="hrName">HR Name</label>
-                        <input type="text" name="hrName" id="hrName" placeholder="Enter HR Name" required pattern="^[A-Za-z\s]+$" title="Only alphabets and spaces allowed" oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, '')">
+                        <input type="text" name="hrName" id="hrName" placeholder="Enter HR Name" required pattern="^[A-Za-z\s]+$" title="Only alphabets and spaces allowed" oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, ''); document.getElementById('hrNameError').style.display='none'">
+                        <span class="error-msg" id="hrNameError">HR Name must contain only letters and spaces.</span>
                     </div>
                     <div class="form-row" id="emailRow">
                         <label for="email">Official Corporate Email</label>
-                        <input type="email" name="email" id="email" placeholder="e.g. name@company.com" required pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" title="Must be a valid professional email format">
+                        <input type="email" name="email" id="email" placeholder="e.g. name@company.com" required pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" title="Must be a valid professional email format" oninput="document.getElementById('emailError').style.display='none'">
+                        <span class="error-msg" id="emailError">Please enter a valid email address.</span>
                     </div>
                     <div class="form-row" id="contactRow">
                         <label for="contact">Contact Number</label>
-                        <input type="text" name="contact" id="contact" placeholder="10-digit Contact Number" required pattern="^[0-9]{10}$" title="Strictly 10 digit number">
+                        <input type="text" name="contact" id="contact" placeholder="10-digit Contact Number" required pattern="^[6-9]\d{9}$" title="Strictly 10 digit number starting with 6-9" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, ''); document.getElementById('contactError').style.display='none'">
+                        <span class="error-msg" id="contactError">Mobile number must be exactly 10 digits and start with 6-9.</span>
                     </div>
                     <div class="form-row" id="passwordRow">
                         <label for="password">Password</label>
-                        <input type="password" name="password" id="password" placeholder="Enter Password (Min 8 chars)" required minlength="8" pattern="^[^'&quot;=<>;\\]+$" title="Minimum 8 characters. Special injection symbols not allowed.">
+                        <input type="password" name="password" id="password" placeholder="Enter Password (Min 8 chars)" required minlength="8" pattern="^[^'&quot;=<>;\\]+$" title="Minimum 8 characters. Special injection symbols not allowed." oninput="document.getElementById('passwordError').style.display='none'">
+                        <span class="error-msg" id="passwordError">Password must be at least 8 chars and contain no injection symbols.</span>
                     </div>
                     <button type="submit" id="submitBtn" class="btn-primary">Register Company</button>
                     <p class="toggle-text">Already registered? <a href="#" id="toggleLogin">Login here</a></p>
@@ -74,6 +95,45 @@
         // Handle form submission and API call
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            let isValid = true;
+            
+            const emailInput = document.getElementById('email');
+            const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+            if(!emailInput.value.match(emailRegex)) {
+                document.getElementById('emailError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if(!isLogin) {
+                const companyInput = document.getElementById('companyName');
+                if(!companyInput.value.trim() || companyInput.value.match(/[<>{}=\*]/) || companyInput.value.length < 2) {
+                    document.getElementById('companyNameError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                const hrInput = document.getElementById('hrName');
+                if(!hrInput.value.match(/^[A-Za-z\s]+$/) || hrInput.value.trim().length < 2) {
+                    document.getElementById('hrNameError').style.display = 'block';
+                    isValid = false;
+                }
+
+                const contactInput = document.getElementById('contact');
+                const contactRegex = /^[6-9]\d{9}$/;
+                if(!contactInput.value.match(contactRegex)) {
+                    document.getElementById('contactError').style.display = 'block';
+                    isValid = false;
+                }
+            }
+            
+            const passwordInput = document.getElementById('password');
+            if (passwordInput.value.length < 8 || passwordInput.value.match(/['"=<>;\\]/)) {
+                document.getElementById('passwordError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if(!isValid) return;
+
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
             

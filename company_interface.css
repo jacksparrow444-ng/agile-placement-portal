@@ -168,10 +168,66 @@ input:focus{
     margin-top:10px;
 }
 
+.error-msg {
+    color: #dc2626; /* Red color */
+    font-size: 13px;
+    margin-top: 5px;
+    display: none; /* Hidden by default */
+    font-weight: 500;
+}
+
 .timer{
     margin-top:10px;
-    font-weight:500;
+    font-weight:bold;
     color:#003366;
+}
+
+/* --- LOGIN BRAND MARQUEE --- */
+.login-marquee {
+    margin-top: auto;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-track {
+    display: flex;
+    align-items: center;
+    width: calc(160px * 10);
+    animation: marqueeScroll 20s linear infinite;
+}
+
+.marquee-track:hover {
+    animation-play-state: paused;
+}
+
+.marquee-item {
+    width: 160px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    transition: all 0.4s ease;
+    cursor: default;
+}
+
+.marquee-item i {
+    font-size: 26px;
+}
+
+.marquee-item:hover {
+    color: #fff;
+    transform: scale(1.1);
+}
+
+@keyframes marqueeScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-160px * 5)); }
 }
 /* Toggle Link Style */
 .toggle-text {
