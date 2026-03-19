@@ -204,7 +204,13 @@ app.post('/api/student/upload-resume', upload.single('resume'), (req, res) => {
 
     let sql = `UPDATE students SET department=?, cgpa=?, passoutYear=?, skills=?, github=?, activeBacklogs=?, resumePath=COALESCE(?, resumePath) WHERE id=?`;
     db.run(sql, [department, parseFloat(cgpa), passoutYear, skills, github, parseInt(activeBacklogs) || 0, resumePath, studentId], function(err) {
-        if (err) return res.status(500).json({ success: false, message: "Failed to update profile." });
+        if (err) {
+            console.error("❌ Profile Update DB Error:", err.message);
+            if (err.message.includes("SQLITE_BUSY")) {
+                return res.status(500).json({ success: false, message: "Database is locked by DB Browser! Please open DB Browser, click 'Write Changes', and close it." });
+            }
+            return res.status(500).json({ success: false, message: "Failed to update profile: " + err.message });
+        }
         res.json({ success: true, message: "Profile & Resume updated successfully!" });
     });
 });

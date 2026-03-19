@@ -17,7 +17,7 @@ body{
 /* MAIN WRAPPER */
 .wrapper{
     width:1100px;
-    height:600px;
+    min-height:600px;
     display:flex;
     background:white;
 
@@ -51,11 +51,11 @@ body{
     opacity:0.9;
 }
 
-/* RIGHT PANEL */
 .form-section{
     width:60%;
     padding:60px;
     background:white;
+    overflow-y: auto;
 }
 
 /* FORM ROWS & LABELS */

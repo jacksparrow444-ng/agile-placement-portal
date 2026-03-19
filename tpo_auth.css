@@ -54,7 +54,6 @@ body {
     font-size: 14px;
 }
 
-/* Right Panel */
 .form-section {
     width: 60%;
     padding: 60px;
@@ -62,6 +61,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    overflow-y: auto;
 }
 
 .form-card h2 {
