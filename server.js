@@ -90,6 +90,8 @@ db.serialize(() => {
         eligibility TEXT, skills TEXT, lastDate TEXT, maxBacklogs INTEGER DEFAULT 0,
         status TEXT DEFAULT 'active', postedDate DATE DEFAULT CURRENT_DATE
     )`);
+    db.run("ALTER TABLE jobs ADD COLUMN jobType TEXT", (err) => {});
+    db.run("ALTER TABLE jobs ADD COLUMN workMode TEXT", (err) => {});
 
     // 4.5 Applications Table (With Unique Constraint to prevent double apply)
     db.run(`CREATE TABLE IF NOT EXISTS applications (
@@ -191,6 +193,103 @@ app.post('/api/login', (req, res) => {
     } else {
         return res.status(400).json({ success: false, message: "Invalid role specified." });
     }
+});
+
+// ==========================================
+// 5.5 RESET PASSWORD API
+// ==========================================
+// --- PUBLIC API (LANDING PAGE STATS) ---
+app.get('/api/public/stats', (req, res) => {
+    const stats = {};
+    db.serialize(() => {
+        // Fetch accurate real data for the portal statistics
+        db.get("SELECT COUNT(*) as count FROM companies", (err, row) => { 
+            stats.companiesOnboard = row ? row.count : 0; 
+        });
+        db.get("SELECT COUNT(DISTINCT studentId) as count FROM applications WHERE status='hired'", (err, row) => { 
+            stats.studentsPlaced = row ? row.count : 0; 
+        });
+        db.get("SELECT COUNT(*) as count FROM jobs", (err, row) => { 
+            stats.activeInternships = row ? row.count : 0; 
+        });
+        db.get("SELECT COUNT(*) as total_apps FROM applications", (err, totalRow) => {
+            db.get("SELECT COUNT(*) as successful_apps FROM applications WHERE status='hired'", (err, successRow) => {
+                const total = totalRow ? totalRow.total_apps : 0;
+                const successful = successRow ? successRow.successful_apps : 0;
+                stats.placementRate = total > 0 ? Math.round((successful / total) * 100) : 0;
+                res.json({ success: true, ...stats }); 
+            });
+        });
+    });
+});
+
+// --- PUBLIC API (LATEST JOBS) ---
+app.get('/api/public/latest-jobs', (req, res) => {
+    const query = `
+        SELECT jobs.id, jobs.jobTitle as title, jobs.location, jobs.salary as compensation, jobs.jobType, jobs.workMode, companies.companyName 
+        FROM jobs 
+        JOIN companies ON jobs.companyId = companies.id 
+        WHERE jobs.status = 'active' OR jobs.status = 'open'
+        ORDER BY jobs.id DESC 
+        LIMIT 3
+    `;
+    db.all(query, [], (err, rows) => {
+        if (err) {
+            console.error("Error fetching latest jobs:", err);
+            return res.status(500).json({ success: false, message: 'Database error' });
+        }
+        res.json({ success: true, jobs: rows });
+    });
+});
+
+// ==========================================
+// --- PASSWORD RESET ---
+app.post('/api/reset-password', (req, res) => {
+    const { role, identity, newPassword } = req.body;
+    
+    // Strict Password Validation
+    if (!newPassword || newPassword.length < 8 || /['"=<>;\\]/.test(newPassword)) {
+        return res.status(400).json({ success: false, message: "Invalid password format." });
+    }
+
+    let sql = "";
+    let values = [];
+
+    if (role === 'student') {
+        sql = "UPDATE students SET password = ? WHERE email = ?";
+        values = [newPassword, identity];
+    } else if (role === 'company') {
+        sql = "UPDATE companies SET password = ? WHERE email = ?";
+        values = [newPassword, identity];
+    } else if (role === 'tpo') {
+        sql = "UPDATE tpo SET password = ? WHERE staffID = ?";
+        values = [newPassword, identity];
+    } else {
+        return res.status(400).json({ success: false, message: "Invalid role specified." });
+    }
+
+    db.run(sql, values, function(err) {
+        if (err) return res.status(500).json({ success: false, message: "Database error." });
+        if (this.changes === 0) return res.status(404).json({ success: false, message: "Account not found in our database!" });
+        res.json({ success: true, message: "Password reset successful!" });
+    });
+});
+
+// ==========================================
+// --- DEBUGGING & ADMIN API ---
+// Expose the database directly for debugging purposes (Admin Viewer)
+app.get('/api/debug/database', (req, res) => {
+    const dbData = {};
+    db.serialize(() => {
+        db.all("SELECT * FROM students", (err, rows) => { dbData.students = rows; });
+        db.all("SELECT * FROM companies", (err, rows) => { dbData.companies = rows; });
+        db.all("SELECT * FROM tpo_staff", (err, rows) => { dbData.tpo_staff = rows; });
+        db.all("SELECT * FROM jobs", (err, rows) => { dbData.jobs = rows; });
+        db.all("SELECT * FROM applications", (err, rows) => { 
+            dbData.applications = rows;
+            res.json({ success: true, data: dbData });
+        });
+    });
 });
 
 // ==========================================
@@ -307,10 +406,10 @@ app.get('/api/student/my-applications/:id', (req, res) => {
 
 // Post a New Job
 app.post('/api/company/post-job', (req, res) => {
-    const { companyId, jobTitle, jobDescription, salary, location, eligibility, maxBacklogs, skills, lastDate } = req.body;
-    const sql = `INSERT INTO jobs (companyId, jobTitle, jobDescription, salary, location, eligibility, maxBacklogs, skills, lastDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const { companyId, jobTitle, jobDescription, salary, location, eligibility, maxBacklogs, skills, lastDate, jobType, workMode } = req.body;
+    const sql = `INSERT INTO jobs (companyId, jobTitle, jobDescription, salary, location, eligibility, maxBacklogs, skills, lastDate, jobType, workMode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     
-    db.run(sql, [companyId, jobTitle, jobDescription, salary, location, eligibility, parseInt(maxBacklogs) || 0, skills, lastDate], function(err) {
+    db.run(sql, [companyId, jobTitle, jobDescription, salary, location, eligibility, parseInt(maxBacklogs) || 0, skills, lastDate, jobType, workMode], function(err) {
         if (err) return res.status(500).json({ success: false, message: "Failed to post job." });
         res.json({ success: true, message: "Job Posted Successfully!" });
     });
@@ -329,6 +428,26 @@ app.delete('/api/company/delete-job/:id', (req, res) => {
     db.run(`DELETE FROM jobs WHERE id = ?`, [req.params.id], function(err) {
         if (err) return res.status(500).json({ success: false, message: "Failed to delete job." });
         res.json({ success: true, message: "Job deleted successfully." });
+    });
+});
+
+// Edit a Job
+app.post('/api/company/edit-job/:id', (req, res) => {
+    const { companyId, jobTitle, jobDescription, salary, location, eligibility, maxBacklogs, skills, lastDate, jobType, workMode } = req.body;
+    const sql = `UPDATE jobs SET jobTitle=?, jobDescription=?, salary=?, location=?, eligibility=?, maxBacklogs=?, skills=?, lastDate=?, jobType=?, workMode=? WHERE id=? AND companyId=?`;
+    
+    db.run(sql, [jobTitle, jobDescription, salary, location, eligibility, parseInt(maxBacklogs) || 0, skills, lastDate, jobType, workMode, req.params.id, companyId], function(err) {
+        if (err) return res.status(500).json({ success: false, message: "Failed to update job." });
+        res.json({ success: true, message: "Job Updated Successfully!" });
+    });
+});
+
+// Close a Job
+app.post('/api/company/close-job/:id', (req, res) => {
+    const { companyId } = req.body;
+    db.run(`UPDATE jobs SET status = 'closed' WHERE id = ? AND companyId = ?`, [req.params.id, companyId], function(err) {
+        if (err) return res.status(500).json({ success: false, message: "Failed to close job." });
+        res.json({ success: true, message: "Job closed successfully." });
     });
 });
 

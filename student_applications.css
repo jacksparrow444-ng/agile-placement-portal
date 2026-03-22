@@ -206,6 +206,16 @@ body {
     color: #dc2626; 
 }
 
+.status-badge.shortlisted {
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+
+.status-badge.hired {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
 /* Buttons */
 .btn-view { 
     background: transparent; 

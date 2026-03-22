@@ -81,15 +81,23 @@
             data.applications.forEach(app => {
                 let statusClass = 'pending';
                 let resultText = 'Awaited';
-                if(app.status === 'pending') activeCount++;
+                let isActive = false;
                 
-                if(app.status === 'approved') {
-                    statusClass = 'approved';
-                    resultText = 'Selected';
+                if(app.status === 'pending') {
+                    isActive = true;
+                } else if(app.status === 'shortlisted') {
+                    statusClass = 'shortlisted';
+                    resultText = 'In Progress';
+                    isActive = true;
+                } else if(app.status === 'hired' || app.status === 'approved') {
+                    statusClass = 'hired';
+                    resultText = 'Selected 🎉';
                 } else if(app.status === 'rejected') {
                     statusClass = 'rejected';
                     resultText = 'Not Selected';
                 }
+                
+                if(isActive) activeCount++;
 
                 const firstLetter = app.companyName.charAt(0);
 

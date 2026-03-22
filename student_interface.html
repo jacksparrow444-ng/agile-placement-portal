@@ -73,7 +73,11 @@
 
                 <div class="form-row" id="passwordRow">
                     <label for="password">Password</label>
-                    <input type="password" name="password" id="password" placeholder="Enter Password (Min 8 characters)" required minlength="8" pattern="^[^'&quot;=<>;\\]+$" title="Minimum 8 characters. Special injection symbols not allowed." oninput="document.getElementById('passwordError').style.display='none'">
+                    <div style="position: relative;">
+                        <input type="password" name="password" id="password" placeholder="Enter Password (Min 8 characters)" required minlength="8" pattern="^[^'&quot;=<>;\\]+$" title="Minimum 8 characters. Special injection symbols not allowed." oninput="document.getElementById('passwordError').style.display='none'" style="width: 100%; box-sizing: border-box; padding-right: 40px;">
+                        <i class="fas fa-eye-slash" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #64748b;" onclick="togglePasswordVisibility('password', 'togglePassword')"></i>
+                    </div>
+                    <div style="text-align: right; margin-top: 5px; display: none;" id="forgotPasswordDiv"><a href="forgot_password.html?role=student" style="font-size: 13px; color: #1a237e; text-decoration: none; font-weight: 600;">Forgot Password?</a></div>
                     <span class="error-msg" id="passwordError">Password must be at least 8 chars and contain no injection symbols (' " = < > ; \).</span>
                 </div>
 
@@ -101,6 +105,20 @@
 </div>
 
 <script>
+    function togglePasswordVisibility(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        } else {
+            input.type = "password";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        }
+    }
+
     const studentForm = document.getElementById('studentForm');
     const formTitle = document.getElementById('formTitle');
     const submitBtn = document.getElementById('submitBtn');
@@ -121,6 +139,7 @@
         document.getElementById('deptRow').style.display = 'none';
         document.getElementById('contactRow').style.display = 'none';
         document.getElementById('termsRow').style.display = 'none';
+        document.getElementById('forgotPasswordDiv').style.display = 'block';
         
         // Clear all inputs except email (so user doesn't have to retype it)
         document.getElementById('studentName').value = '';
@@ -146,6 +165,7 @@
             document.getElementById('deptRow').style.display = 'none';
             document.getElementById('contactRow').style.display = 'none';
             document.getElementById('termsRow').style.display = 'none';
+            document.getElementById('forgotPasswordDiv').style.display = 'block';
             document.querySelectorAll('input, select').forEach(el => { if(el.id !== 'email' && el.id !== 'password') el.required = false; });
         } else {
             formTitle.innerText = "Student Registration";
@@ -156,6 +176,7 @@
             document.getElementById('deptRow').style.display = 'block';
             document.getElementById('contactRow').style.display = 'block';
             document.getElementById('termsRow').style.display = 'block';
+            document.getElementById('forgotPasswordDiv').style.display = 'none';
             document.querySelectorAll('input, select').forEach(el => el.required = true);
         }
     });

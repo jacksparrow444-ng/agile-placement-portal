@@ -31,6 +31,7 @@
                             <th>Location</th>
                             <th>Salary</th>
                             <th>Last Date</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -40,7 +41,34 @@
             </div>
         </main>
     </div>
+
+    <!-- Edit Job Modal -->
+    <div class="modal-overlay" id="editJobModal" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+        <div style="background:white; padding:30px; border-radius:10px; width:500px; max-width:90%;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0;">Edit Job</h2>
+                <button onclick="closeEditModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+            <form id="editJobForm">
+                <input type="hidden" id="editJobId">
+                    <div><label style="font-size:14px; font-weight:600;">Job Title</label><input type="text" id="editJobTitle" required style="width:100%; padding:8px; margin-top:5px; border:1px solid #ddd; border-radius:4px;"></div>
+                    <div><label style="font-size:14px; font-weight:600;">Job Type</label><select id="editJobType" required style="width:100%; padding:8px; margin-top:5px; border:1px solid #ddd; border-radius:4px; background:#fff;"><option value="internship">Internship</option><option value="full-time">Full-Time</option></select></div>
+                    <div><label style="font-size:14px; font-weight:600;">Work Mode</label><select id="editWorkMode" required style="width:100%; padding:8px; margin-top:5px; border:1px solid #ddd; border-radius:4px; background:#fff;"><option value="remote">Remote</option><option value="office">In-Office</option></select></div>
+                    <div><label style="font-size:14px; font-weight:600;">Location</label><input type="text" id="editLocation" required style="width:100%; padding:8px; margin-top:5px; border:1px solid #ddd; border-radius:4px;"></div>
+                    <div><label style="font-size:14px; font-weight:600;">Salary</label><input type="text" id="editSalary" required style="width:100%; padding:8px; margin-top:5px; border:1px solid #ddd; border-radius:4px;"></div>
+                    <div><label style="font-size:14px; font-weight:600;">Last Date</label><input type="date" id="editLastDate" required style="width:100%; padding:8px; margin-top:5px; border:1px solid #ddd; border-radius:4px;"></div>
+                    <div><label style="font-size:14px; font-weight:600;">Min CGPA</label><input type="number" step="0.1" id="editEligibility" required style="width:100%; padding:8px; margin-top:5px; border:1px solid #ddd; border-radius:4px;"></div>
+                    <div><label style="font-size:14px; font-weight:600;">Max Backlogs</label><input type="number" id="editMaxBacklogs" required style="width:100%; padding:8px; margin-top:5px; border:1px solid #ddd; border-radius:4px;"></div>
+                    <div style="grid-column: 1 / -1;"><label style="font-size:14px; font-weight:600;">Skills</label><input type="text" id="editSkills" required style="width:100%; padding:8px; margin-top:5px; border:1px solid #ddd; border-radius:4px;"></div>
+                    <div style="grid-column: 1 / -1;"><label style="font-size:14px; font-weight:600;">Description</label><textarea id="editDescription" rows="3" style="width:100%; padding:8px; margin-top:5px; border:1px solid #ddd; border-radius:4px;"></textarea></div>
+                </div>
+                <button type="submit" style="margin-top:20px; width:100%; background:#0369a1; color:white; padding:12px; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
     <script>
+    let allCompanyJobs = [];
     async function loadMyJobs() {
         const user = JSON.parse(localStorage.getItem('currentUser'));
         // Session Check: Agar user nahi hai toh login pe bhejo
@@ -62,7 +90,34 @@
                 return;
             }
 
+            allCompanyJobs = data.jobs;
+
             data.jobs.forEach(job => {
+                let statusHtml = job.status === 'active' 
+                    ? '<span style="color: #16a34a; font-weight:600; padding:4px 8px; background:#dcfce7; border-radius:12px; font-size:12px;"><i class="fas fa-circle" style="font-size:8px;"></i> Active</span>' 
+                    : `<span style="color: #991b1b; font-weight:600; padding:4px 8px; background:#fee2e2; border-radius:12px; font-size:12px;">${job.status.charAt(0).toUpperCase() + job.status.slice(1)}</span>`;
+
+                let buttonsHtml = `
+                    <a href="view_applicants.html?jobId=${job.id}" style="background:#e0f2fe; color:#0369a1; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600; text-decoration: none; margin-right: 5px; display: inline-block;">
+                        <i class="fas fa-users"></i> Applicants
+                    </a>
+                    <button onclick="openEditModal(${job.id})" style="background:#fef3c7; color:#d97706; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600; margin-right: 5px;">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                `;
+                if(job.status === 'active') {
+                    buttonsHtml += `
+                        <button onclick="closeJob(${job.id})" style="background:#f3f4f6; color:#4b5563; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600; margin-right: 5px;">
+                            <i class="fas fa-ban"></i> Close
+                        </button>
+                    `;
+                }
+                buttonsHtml += `
+                    <button onclick="deleteJob(${job.id})" style="background:#fee2e2; color:#ef4444; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600;">
+                        <i class="fas fa-trash-alt"></i> Delete
+                    </button>
+                `;
+
                 tableBody.innerHTML += `
                     <tr style="border-bottom: 1px solid #f1f5f9; transition: 0.3s;">
                         <td style="padding: 15px;">
@@ -72,19 +127,86 @@
                         <td style="color: #475569;">${job.location}</td>
                         <td style="color: #475569; font-weight: 500;">${job.salary}</td>
                         <td style="color: #475569;">${job.lastDate}</td>
-                        <td>
-                            <a href="view_applicants.html?jobId=${job.id}" style="background:#e0f2fe; color:#0369a1; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600; text-decoration: none; margin-right: 5px; display: inline-block;">
-                                <i class="fas fa-users"></i> Applicants
-                            </a>
-                            <button onclick="deleteJob(${job.id})" style="background:#fee2e2; color:#ef4444; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600;">
-                                <i class="fas fa-trash-alt"></i> Delete
-                            </button>
-                        </td>
+                        <td>${statusHtml}</td>
+                        <td>${buttonsHtml}</td>
                     </tr>
                 `;
             });
         } catch (err) { 
             console.error("Jobs load nahi ho payi:", err); 
+        }
+    }
+
+    function openEditModal(jobId) {
+        const job = allCompanyJobs.find(j => j.id === jobId);
+        if(!job) return;
+        document.getElementById('editJobId').value = job.id;
+        document.getElementById('editJobTitle').value = job.jobTitle;
+        document.getElementById('editJobType').value = job.jobType || 'internship';
+        document.getElementById('editWorkMode').value = job.workMode || 'office';
+        document.getElementById('editLocation').value = job.location;
+        document.getElementById('editSalary').value = job.salary;
+        document.getElementById('editLastDate').value = job.lastDate;
+        document.getElementById('editEligibility').value = job.eligibility;
+        document.getElementById('editMaxBacklogs').value = job.maxBacklogs;
+        document.getElementById('editSkills').value = job.skills;
+        document.getElementById('editDescription').value = job.jobDescription;
+        document.getElementById('editJobModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editJobModal').style.display = 'none';
+    }
+
+    document.getElementById('editJobForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        const jobId = document.getElementById('editJobId').value;
+        const data = {
+            companyId: user.id,
+            jobTitle: document.getElementById('editJobTitle').value,
+            jobType: document.getElementById('editJobType').value,
+            workMode: document.getElementById('editWorkMode').value,
+            location: document.getElementById('editLocation').value,
+            salary: document.getElementById('editSalary').value,
+            lastDate: document.getElementById('editLastDate').value,
+            eligibility: document.getElementById('editEligibility').value,
+            maxBacklogs: document.getElementById('editMaxBacklogs').value,
+            skills: document.getElementById('editSkills').value,
+            jobDescription: document.getElementById('editDescription').value
+        };
+
+        try {
+            const res = await fetch(`http://localhost:3000/api/company/edit-job/${jobId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if(result.success) {
+                closeEditModal();
+                loadMyJobs();
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch(err) { alert("Failed to connect to server"); }
+    });
+
+    async function closeJob(id) {
+        if (!confirm("Are you sure you want to close this job? Students will no longer be able to apply.")) return;
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        try {
+            const res = await fetch(`http://localhost:3000/api/company/close-job/${id}`, { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ companyId: user.id })
+            });
+            const result = await res.json();
+            if (result.success) {
+                loadMyJobs();
+            }
+        } catch (err) {
+            alert("Error closing job");
         }
     }
 

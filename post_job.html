@@ -20,6 +20,8 @@
             <form id="jobForm" style="background:white; padding:30px; border-radius:10px; margin-top:20px;">
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
                     <div><label>Job Title</label><input type="text" name="jobTitle" required style="width:100%; padding:10px;"></div>
+                    <div><label>Job Type</label><select name="jobType" required style="width:100%; padding:10px; border:1px solid #ccc; background:#fff;"><option value="" disabled selected>Select Job Type</option><option value="internship">Internship</option><option value="full-time">Full-Time</option></select></div>
+                    <div><label>Work Mode</label><select name="workMode" required style="width:100%; padding:10px; border:1px solid #ccc; background:#fff;"><option value="" disabled selected>Select Work Mode</option><option value="office">In-Office</option><option value="remote">Remote</option></select></div>
                     <div><label>Location</label><input type="text" name="location" required style="width:100%; padding:10px;"></div>
                     <div><label>Salary (LPA)</label><input type="text" name="salary" required style="width:100%; padding:10px;"></div>
                     <div><label>Last Date</label><input type="date" name="lastDate" required style="width:100%; padding:10px;"></div>

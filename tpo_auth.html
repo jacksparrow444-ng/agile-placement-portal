@@ -66,7 +66,11 @@
 
                 <div class="form-row" id="passwordRow">
                     <label for="tpoPassword">Password</label>
-                    <input type="password" id="tpoPassword" name="password" placeholder="Password (Min 8 chars)" required minlength="8" pattern="^[^'&quot;=<>;\\]+$" title="Minimum 8 characters. Special injection symbols not allowed." oninput="document.getElementById('tpoPasswordError').style.display='none'">
+                    <div style="position: relative;">
+                        <input type="password" id="tpoPassword" name="password" placeholder="Password (Min 8 chars)" required minlength="8" pattern="^[^'&quot;=<>;\\]+$" title="Minimum 8 characters. Special injection symbols not allowed." oninput="document.getElementById('tpoPasswordError').style.display='none'" style="width: 100%; box-sizing: border-box; padding-right: 40px;">
+                        <i class="fas fa-eye-slash" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #64748b;" onclick="togglePasswordVisibility('tpoPassword', 'togglePassword')"></i>
+                    </div>
+                    <div style="text-align: right; margin-top: 5px; display: none;" id="forgotPasswordDiv"><a href="forgot_password.html?role=tpo" style="font-size: 13px; color: #1a237e; text-decoration: none; font-weight: 600;">Forgot Password?</a></div>
                     <span class="error-msg" id="tpoPasswordError">Password must be at least 8 chars and contain no injection symbols.</span>
                 </div>
 
@@ -86,17 +90,58 @@
     <div class="modal-box" style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
         <h3 id="successTitle">Success!</h3>
         <p id="successMsg">TPO Registration is complete. Please login.</p>
-        <button id="closeSuccessBtn" class="btn-primary" style="margin-top: 15px;" onclick="location.reload()">Continue</button>
+        <button id="closeSuccessBtn" class="btn-primary" style="margin-top: 15px;" onclick="switchToLoginAndCloseModal()">Continue to Login</button>
     </div>
 </div>
 
 <script>
+    function togglePasswordVisibility(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        } else {
+            input.type = "password";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        }
+    }
+
     const tpoForm = document.getElementById('tpoForm');
     const formTitle = document.getElementById('formTitle');
     const formSubtitle = document.getElementById('formSubtitle');
     const submitBtn = document.getElementById('submitBtn');
     const toggleLogin = document.getElementById('toggleLogin');
     let isLoginMode = false;
+
+    function switchToLoginAndCloseModal() {
+        document.getElementById('successModal').style.display = 'none';
+        isLoginMode = true;
+        
+        formTitle.innerText = "TPO Staff Login";
+        formSubtitle.innerText = "Enter your credentials to access the admin dashboard.";
+        submitBtn.innerText = "Login as TPO";
+        toggleLogin.innerText = "Register here";
+        
+        document.getElementById('nameRow').style.display = 'none';
+        document.getElementById('emailRow').style.display = 'none';
+        document.getElementById('contactRow').style.display = 'none';
+        document.getElementById('idRow').style.display = 'block';
+        
+        document.getElementById('tpoName').required = false;
+        document.getElementById('tpoEmail').required = false;
+        document.getElementById('tpoContact').required = false;
+        document.getElementById('staffId').required = true;
+        
+        document.getElementById('tpoName').value = '';
+        document.getElementById('tpoEmail').value = '';
+        document.getElementById('tpoContact').value = '';
+        document.getElementById('tpoPassword').value = '';
+
+        document.getElementById('forgotPasswordDiv').style.display = 'block';
+    }
 
     // Toggle between Registration and Login modes
     toggleLogin.addEventListener('click', (e) => {
@@ -122,6 +167,7 @@
             document.getElementById('tpoEmail').required = false;
             document.getElementById('tpoContact').required = false;
             document.getElementById('staffId').required = true;
+            document.getElementById('forgotPasswordDiv').style.display = 'block';
         } else {
             formTitle.innerText = "TPO Staff Registration";
             formSubtitle.innerText = "Create your admin account to access the portal.";
@@ -139,6 +185,7 @@
             document.getElementById('staffId').required = true;
             document.getElementById('tpoEmail').required = true;
             document.getElementById('tpoContact').required = true;
+            document.getElementById('forgotPasswordDiv').style.display = 'none';
         }
     });
 

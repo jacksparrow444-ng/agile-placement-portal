@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Viewer Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; padding: 20px; color: #0f172a; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 24px; color: #1e293b; }
+        .refresh-btn { background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .refresh-btn:hover { background: #0284c7; }
+        
+        .tables-container { display: flex; flex-direction: column; gap: 30px; }
+        .db-table-section { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow-x: auto; }
+        .db-table-section h3 { margin-top: 0; color: #334155; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; text-transform: capitalize; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
+        th { background: #f8fafc; font-weight: 600; color: #64748b; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+        tr:hover { background: #f8fafc; }
+        .null-val { color: #cbd5e1; font-style: italic; }
+        .loader { text-align: center; padding: 40px; color: #64748b; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🗄️ Live Database Viewer</h1>
+        <button class="refresh-btn" onclick="fetchDatabase()">🔄 Refresh Data</button>
+    </div>
+
+    <div class="tables-container" id="tablesContainer">
+        <div class="loader">Loading database records...</div>
+    </div>
+
+    <script>
+        async function fetchDatabase() {
+            const container = document.getElementById('tablesContainer');
+            container.innerHTML = '<div class="loader">Refreshing database records...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/debug/database');
+                const result = await response.json();
+                
+                if (result.success) {
+                    container.innerHTML = '';
+                    
+                    // Iterate over each table
+                    for (const [tableName, rows] of Object.entries(result.data)) {
+                        const section = document.createElement('div');
+                        section.className = 'db-table-section';
+                        
+                        let html = `<h3>${tableName} (${rows.length} records)</h3>`;
+                        
+                        if (rows.length === 0) {
+                            html += `<p style="color: #94a3b8; font-style: italic;">No records found.</p>`;
+                        } else {
+                            // Extract column names from the first format
+                            const columns = Object.keys(rows[0]);
+                            
+                            html += `<table><thead><tr>`;
+                            columns.forEach(col => html += `<th>${col}</th>`);
+                            html += `</tr></thead><tbody>`;
+                            
+                            rows.forEach(row => {
+                                html += `<tr>`;
+                                columns.forEach(col => {
+                                    const val = row[col];
+                                    if (val === null || val === '') html += `<td class="null-val">NULL</td>`;
+                                    else html += `<td>${val}</td>`;
+                                });
+                                html += `</tr>`;
+                            });
+                            
+                            html += `</tbody></table>`;
+                        }
+                        
+                        section.innerHTML = html;
+                        container.appendChild(section);
+                    }
+                } else {
+                    container.innerHTML = `<div class="loader" style="color: red;">Error loading database: ${result.message}</div>`;
+                }
+            } catch (err) {
+                container.innerHTML = `<div class="loader" style="color: red;">Server Connection Failed. Make sure "node server.js" is running.</div>`;
+            }
+        }
+
+        // Fetch initially
+        fetchDatabase();
+    </script>
+</body>
+</html>

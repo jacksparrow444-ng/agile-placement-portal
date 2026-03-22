@@ -1,5 +1,15 @@
 document.addEventListener("DOMContentLoaded", function() {
     
+    // Navbar Scroll Effect
+    const navbar = document.querySelector('.navbar');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+
     // Animate on Scroll Function
     const reveal = () => {
         const reveals = document.querySelectorAll(".scroll-reveal");
@@ -64,6 +74,63 @@ document.addEventListener("DOMContentLoaded", function() {
         window.requestAnimationFrame(step);
     };
 
-    // Execute API pull on load
+    // --- Dynamic Latest Jobs Fetching ---
+    const fetchLatestJobs = async () => {
+        try {
+            const res = await fetch('http://localhost:3000/api/public/latest-jobs');
+            const data = await res.json();
+            const container = document.getElementById('latestJobsContainer');
+            
+            if(data.success && data.jobs.length > 0) {
+                container.innerHTML = ''; // clear loading state
+                data.jobs.forEach(job => {
+                    const compInitial = job.companyName.charAt(0).toUpperCase();
+                    container.innerHTML += `
+                        <div class="job-item">
+                            <div class="job-main-info">
+                                <div class="company-logo" style="background:#f1f5f9; color: var(--primary);">${compInitial}</div>
+                                <div class="job-info">
+                                    <h4>${job.title}</h4>
+                                    <p>
+                                        <span><i class="fas fa-building"></i> ${job.companyName}</span>
+                                        <span><i class="fas fa-map-marker-alt"></i> ${job.location}</span>
+                                        <span><i class="fas fa-rupee-sign"></i> ${job.compensation}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <a href="student_interface.html" class="apply-small-btn">Apply Now</a>
+                        </div>
+                    `;
+                });
+            } else {
+                container.innerHTML = `<p style="text-align:center; color: var(--text-muted);">No current openings. Check back soon!</p>`;
+            }
+        } catch (error) {
+            console.error("Error fetching latest jobs:", error);
+        }
+    };
+
+    // --- Dark/Light Mode Theme Toggle ---
+    const themeBtn = document.getElementById('themeToggle');
+    const themeIcon = themeBtn.querySelector('i');
+    
+    if(localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeIcon.classList.replace('fa-moon', 'fa-sun');
+    }
+
+    themeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        if(document.body.classList.contains('dark-mode')) {
+            localStorage.setItem('theme', 'dark');
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+        } else {
+            localStorage.setItem('theme', 'light');
+            themeIcon.classList.replace('fa-sun', 'fa-moon');
+        }
+    });
+
+    // Execute API pulls on load
     fetchStats();
+    fetchLatestJobs();
 });
