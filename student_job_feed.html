@@ -18,7 +18,7 @@
             <a href="student_job_feed.html" class="nav-item active" id="nav-feed"><i class="fas fa-th-large"></i> Job Feed</a>
             <a href="student_applications.html" class="nav-item" id="nav-apps"><i class="fas fa-layer-group"></i> My Applications</a>
             <a href="student_profile.html" class="nav-item" id="nav-profile"><i class="fas fa-user-circle"></i> My Profile</a>
-            <a href="#" class="nav-item"><i class="fas fa-bell"></i> Notifications</a>
+            <a href="student_notifications.html" class="nav-item"><i class="fas fa-bell"></i> Notifications</a>
         </nav>
         <div class="logout-area">
             <a href="index.html" class="nav-item text-danger" onclick="localStorage.clear()"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -36,6 +36,11 @@
                 <input type="text" id="searchInput" placeholder="Search by role or company...">
             </div>
         </header>
+
+        <div id="announcementBanner" style="display: none; background: #e0e7ff; color: #3730a3; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border-left: 4px solid #4f46e5;">
+            <strong id="annTitle" style="font-size: 15px; display: block; margin-bottom: 5px;"></strong>
+            <span id="annMsg" style="font-size: 13px;"></span>
+        </div>
 
         <div class="feed-layout fade-in-up delay-1">
             <aside class="filters-sidebar">
@@ -119,6 +124,21 @@
         }
     }
 
+    async function loadAnnouncements() {
+        try {
+            const res = await fetch('http://localhost:3000/api/public/announcements');
+            const data = await res.json();
+            if(data.success && data.announcements.length > 0) {
+                const valid = data.announcements.filter(a => a.audience === 'all' || a.audience === 'students');
+                if(valid.length > 0) {
+                    document.getElementById('annTitle').innerHTML = '<i class="fas fa-bullhorn"></i> ' + valid[0].title;
+                    document.getElementById('annMsg').innerText = valid[0].message;
+                    document.getElementById('announcementBanner').style.display = 'block';
+                }
+            }
+        } catch(e) {}
+    }
+
     function updateLocationDropdown() {
         const select = document.getElementById('locationFilter');
         const uniqueLocations = [...new Set(allJobs.map(job => job.location?.trim()))].filter(l => l);
@@ -193,7 +213,7 @@
     document.getElementById('applyJobForm').addEventListener('submit', async function(e) {
         e.preventDefault(); // Ye line page refresh hone se rokegi!
 
-        const user = JSON.parse(localStorage.getItem('currentUser'));
+        const user = JSON.parse(localStorage.getItem('currentStudent'));
         if (!user || !user.id) {
             alert("Please login as a student first!");
             window.location.href = 'index.html';
@@ -219,10 +239,10 @@
             if (result.success) {
                 alert("✅ Application Submitted Successfully!");
                 closeModal();
-                // Turant status dikhane ke liye My Applications par bhej do
+                // Redirect to My Applications for immediate status viewing
                 window.location.href = 'student_applications.html';
             } else {
-                alert("❌ " + result.message); // Agar CGPA kam hua toh yahan alert aayega
+                alert("❌ " + result.message); // Show alert if CGPA is lower than required eligibility
             }
         } catch (err) {
             console.error("Submission Error:", err);
@@ -236,7 +256,7 @@
         el.addEventListener('change', applyFilters);
     });
 
-    window.onload = loadJobs;
+    window.onload = () => { loadJobs(); loadAnnouncements(); };
 </script>
 </body>
 </html>

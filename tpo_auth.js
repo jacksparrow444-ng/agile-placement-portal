@@ -159,10 +159,11 @@ document.addEventListener("DOMContentLoaded", function() {
         successModal.style.display = "none";
         
         if (isLoginMode) {
-            // Asli project me yahan dashboard link aayega
+            // Redirect to actual dashboard link
             window.location.href = "tpo_dashboard.html"; 
         } else {
-            // Registration ke baad clear form and switch to login
+            // Clear form and switch to login after registration
+
             form.reset();
             toggleBtn.click(); 
         }

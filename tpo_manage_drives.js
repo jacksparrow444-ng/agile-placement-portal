@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const role = row.cells[1].innerText;
     const currentStatus = row.querySelector('.status-pill').innerText;
 
-    // Form mein bharo
+    // Fill the form
     document.getElementById('editRowId').value = rowId;
     document.getElementById('editCompName').value = compName;
     document.getElementById('editRole').value = role;

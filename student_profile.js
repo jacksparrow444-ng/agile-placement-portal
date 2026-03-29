@@ -121,13 +121,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const photoInput = document.getElementById('photoInput');
     const userPhoto = document.getElementById('userPhoto');
 
-    // 1. Pehle se saved photo check karo
+    // 1. Check previously saved photo
     const savedImg = localStorage.getItem('student_pfp');
     if (savedImg) {
         userPhoto.src = savedImg;
     }
 
-    // 2. Photo select hone par change karo
+    // 2. Change upon photo selection
     photoInput.addEventListener('change', function() {
         const file = this.files[0];
         if (file) {
@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
             reader.onload = function(e) {
                 // Photo preview dikhao
                 userPhoto.src = e.target.result;
-                // LocalStorage mein save karo
+                // Save in LocalStorage
                 localStorage.setItem('student_pfp', e.target.result);
             };
             reader.readAsDataURL(file);

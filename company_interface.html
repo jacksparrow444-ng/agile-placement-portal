@@ -204,7 +204,7 @@
                 if(result.success) {
                     if(isLogin) {
                         // Store user session and redirect to dashboard
-                        localStorage.setItem('currentUser', JSON.stringify(result.user));
+                        localStorage.setItem('currentCompany', JSON.stringify(result.user));
                         window.location.href = 'company_dashboard.html';
                     } else { 
                         document.getElementById('successModal').style.display = 'flex'; 

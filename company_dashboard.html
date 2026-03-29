@@ -36,15 +36,15 @@
     <script>
         // --- 1. Main Function: Page Load Pe Chalta Hai ---
         async function initializeDashboard() {
-            const user = JSON.parse(localStorage.getItem('currentUser'));
+            const user = JSON.parse(localStorage.getItem('currentCompany'));
             if (!user) { window.location.href = 'index.html'; return; }
 
             document.getElementById('compHeader').innerText = `Welcome, ${user.companyName}`;
 
-            // UI render karo (Status ke hisab se)
+            // Render UI depending on status
             renderUI(user.status);
 
-            // Agar verified hai toh server se taaza data (counts) lao
+            // Fetch fresh data if verified
             if (user.status === 'verified') {
                 await fetchFreshStats(user.id);
             }

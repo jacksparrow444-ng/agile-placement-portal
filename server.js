@@ -4,6 +4,7 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
+const bcrypt = require('bcrypt');
 
 const app = express();
 
@@ -103,6 +104,20 @@ db.serialize(() => {
         appliedDate DATE DEFAULT CURRENT_DATE,
         UNIQUE(studentId, jobId)
     )`);
+
+    // 4.6 Announcements Table
+    db.run(`CREATE TABLE IF NOT EXISTS announcements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        title TEXT, 
+        message TEXT, 
+        audience TEXT DEFAULT 'all', 
+        date DATE DEFAULT CURRENT_DATE
+    )`);
+
+    // 4.7 Phase 3 Tables (Interviews, Offers, Notifications)
+    db.run(`CREATE TABLE IF NOT EXISTS interviews (id INTEGER PRIMARY KEY AUTOINCREMENT, applicationId INTEGER, date TEXT, time TEXT, link TEXT)`);
+    db.run(`CREATE TABLE IF NOT EXISTS offers (id INTEGER PRIMARY KEY AUTOINCREMENT, applicationId INTEGER, offerUrl TEXT)`);
+    db.run(`CREATE TABLE IF NOT EXISTS student_notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, studentId INTEGER, message TEXT, date DATE DEFAULT CURRENT_DATE)`);
 });
 
 // ==========================================
@@ -110,7 +125,7 @@ db.serialize(() => {
 // ==========================================
 
 // Register (Dynamic for Student, Company, TPO)
-app.post('/api/:role/register', (req, res) => {
+app.post('/api/:role/register', async (req, res) => {
     const { role } = req.params;
     const userData = req.body;
     let table = role === 'tpo' ? 'tpo' : (role === 'student' ? 'students' : 'companies');
@@ -118,6 +133,13 @@ app.post('/api/:role/register', (req, res) => {
     // STRICT BACKEND VALIDATION FOR REGISTRATION
     if (!userData.password || userData.password.length < 8 || /['"=<>;\\]/.test(userData.password)) {
         return res.status(400).json({ success: false, message: "Password must be at least 8 characters and contain no SQL injection symbols." });
+    }
+
+    // Hash the password
+    try {
+        userData.password = await bcrypt.hash(userData.password, 10);
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Error securing password." });
     }
 
     // Contact Number Validation (Starts with 6-9 and exactly 10 digits)
@@ -164,8 +186,10 @@ app.post('/api/login', (req, res) => {
         if (password.length < 8) {
             return res.status(400).json({ success: false, message: "Student password must be at least 8 characters." });
         }
-        db.get(`SELECT * FROM students WHERE email = ? AND password = ?`, [email, password], (err, row) => {
+        db.get(`SELECT * FROM students WHERE email = ?`, [email], async (err, row) => {
             if (err || !row) return res.status(401).json({ success: false, message: "Invalid Credentials" });
+            const match = await bcrypt.compare(password, row.password);
+            if (!match) return res.status(401).json({ success: false, message: "Invalid Credentials" });
             delete row.password;
             res.json({ success: true, user: row, role: role });
         });
@@ -174,8 +198,10 @@ app.post('/api/login', (req, res) => {
         if (!email || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
             return res.status(400).json({ success: false, message: "Use a valid professional email (e.g., name@company.com)." });
         }
-        db.get(`SELECT * FROM companies WHERE email = ? AND password = ?`, [email, password], (err, row) => {
+        db.get(`SELECT * FROM companies WHERE email = ?`, [email], async (err, row) => {
             if (err || !row) return res.status(401).json({ success: false, message: "Invalid Credentials" });
+            const match = await bcrypt.compare(password, row.password);
+            if (!match) return res.status(401).json({ success: false, message: "Invalid Credentials" });
             delete row.password;
             res.json({ success: true, user: row, role: role });
         });
@@ -185,8 +211,10 @@ app.post('/api/login', (req, res) => {
         if (!staffID || !/^[A-Za-z0-9]{10,15}$/.test(staffID)) {
             return res.status(400).json({ success: false, message: "Placement Cell ID must be strictly alphanumeric (10-15 chars). No spaces or specials." });
         }
-        db.get(`SELECT * FROM tpo WHERE staffID = ? AND password = ?`, [staffID, password], (err, row) => {
+        db.get(`SELECT * FROM tpo WHERE staffID = ?`, [staffID], async (err, row) => {
             if (err || !row) return res.status(401).json({ success: false, message: "Invalid Credentials" });
+            const match = await bcrypt.compare(password, row.password);
+            if (!match) return res.status(401).json({ success: false, message: "Invalid Credentials" });
             delete row.password;
             res.json({ success: true, user: row, role: role });
         });
@@ -244,7 +272,7 @@ app.get('/api/public/latest-jobs', (req, res) => {
 
 // ==========================================
 // --- PASSWORD RESET ---
-app.post('/api/reset-password', (req, res) => {
+app.post('/api/reset-password', async (req, res) => {
     const { role, identity, newPassword } = req.body;
     
     // Strict Password Validation
@@ -252,18 +280,25 @@ app.post('/api/reset-password', (req, res) => {
         return res.status(400).json({ success: false, message: "Invalid password format." });
     }
 
+    let hashedPassword;
+    try {
+        hashedPassword = await bcrypt.hash(newPassword, 10);
+    } catch (err) {
+        return res.status(500).json({ success: false, message: "Error securing new password." });
+    }
+
     let sql = "";
     let values = [];
 
     if (role === 'student') {
         sql = "UPDATE students SET password = ? WHERE email = ?";
-        values = [newPassword, identity];
+        values = [hashedPassword, identity];
     } else if (role === 'company') {
         sql = "UPDATE companies SET password = ? WHERE email = ?";
-        values = [newPassword, identity];
+        values = [hashedPassword, identity];
     } else if (role === 'tpo') {
         sql = "UPDATE tpo SET password = ? WHERE staffID = ?";
-        values = [newPassword, identity];
+        values = [hashedPassword, identity];
     } else {
         return res.status(400).json({ success: false, message: "Invalid role specified." });
     }
@@ -352,7 +387,7 @@ app.post('/api/student/apply', (req, res) => {
         }
         
         if (!row) {
-            console.log(`❌ ERROR: Data match nahi hua! Ya toh Student ID (${studentId}) galat hai, ya Job ID (${jobId}) delete ho chuki hai.`);
+            console.log(`❌ ERROR: Data mismatch! Either Student ID (${studentId}) is invalid, or Job ID (${jobId}) is deleted.`);
             return res.status(500).json({ success: false, message: "Student or Job not found in DB" });
         }
 
@@ -379,7 +414,7 @@ app.post('/api/student/apply', (req, res) => {
                 console.log("❌ INSERT ERROR (Pehle hi apply kar chuka hai kya?):", err.message);
                 return res.status(400).json({ success: false, message: "You have already applied!" });
             }
-            console.log("✅ SUCCESS: Application Database mein SAVE ho gayi! ID:", this.lastID);
+            console.log("✅ SUCCESS: Application saved in Database! ID:", this.lastID);
             console.log("=========================================");
             res.json({ success: true, message: "Applied Successfully!" });
         });
@@ -388,15 +423,25 @@ app.post('/api/student/apply', (req, res) => {
 // Get My Applications (LEFT JOIN FIX)
 app.get('/api/student/my-applications/:id', (req, res) => {
     const sql = `
-        SELECT a.appliedDate, a.status, j.jobTitle, c.companyName 
+        SELECT a.id as applicationId, a.appliedDate, a.status, j.jobTitle, c.companyName, o.offerUrl 
         FROM applications a
         LEFT JOIN jobs j ON a.jobId = j.id
         LEFT JOIN companies c ON j.companyId = c.id
+        LEFT JOIN offers o ON a.id = o.applicationId
         WHERE a.studentId = ? ORDER BY a.id DESC
     `;
     db.all(sql, [req.params.id], (err, rows) => {
         if (err) return res.status(500).json({ success: false, message: "Error fetching applications" });
         res.json({ success: true, applications: rows || [] });
+    });
+});
+
+// Withdraw Application
+app.delete('/api/student/withdraw-application/:id', (req, res) => {
+    db.run(`DELETE FROM applications WHERE id = ? AND status = 'pending'`, [req.params.id], function(err) {
+        if (err) return res.status(500).json({ success: false, message: "Server error." });
+        if (this.changes === 0) return res.status(400).json({ success: false, message: "Can only withdraw pending apps." });
+        res.json({ success: true, message: "Application withdrawn successfully!" });
     });
 });
 
@@ -406,12 +451,17 @@ app.get('/api/student/my-applications/:id', (req, res) => {
 
 // Post a New Job
 app.post('/api/company/post-job', (req, res) => {
-    const { companyId, jobTitle, jobDescription, salary, location, eligibility, maxBacklogs, skills, lastDate, jobType, workMode } = req.body;
-    const sql = `INSERT INTO jobs (companyId, jobTitle, jobDescription, salary, location, eligibility, maxBacklogs, skills, lastDate, jobType, workMode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    
-    db.run(sql, [companyId, jobTitle, jobDescription, salary, location, eligibility, parseInt(maxBacklogs) || 0, skills, lastDate, jobType, workMode], function(err) {
-        if (err) return res.status(500).json({ success: false, message: "Failed to post job." });
-        res.json({ success: true, message: "Job Posted Successfully!" });
+    const { companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, deadline } = req.body;
+
+    db.run(`INSERT INTO jobs (companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, deadline) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+    [companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, deadline], function(err) {
+        if (err) return res.status(500).json({ success: false });
+
+        // Phase 3: Auto-notify students
+        const jobMsg = `New Job Posted: ${jobTitle}. Check your Job Feed!`;
+        db.run(`INSERT INTO student_notifications (studentId, message) SELECT id, ? FROM students WHERE status='verified'`, [jobMsg]);
+
+        res.json({ success: true, message: "Job posted successfully!" });
     });
 });
 
@@ -471,6 +521,14 @@ app.post('/api/company/update-application-status', (req, res) => {
     const { applicationId, status } = req.body;
     db.run(`UPDATE applications SET status = ? WHERE id = ?`, [status, applicationId], function(err) {
         if (err) return res.status(500).json({ success: false });
+        
+        db.get(`SELECT studentId FROM applications WHERE id = ?`, [applicationId], (dbErr, row) => {
+            if(row) {
+                const msg = `Your application status has been updated to: ${status.toUpperCase()}`;
+                db.run(`INSERT INTO student_notifications (studentId, message) VALUES (?, ?)`, [row.studentId, msg]);
+            }
+        });
+        
         res.json({ success: true, message: "Application status updated!" });
     });
 });
@@ -570,6 +628,139 @@ app.get('/api/tpo/drive-analytics', (req, res) => {
     db.all(sql, [], (err, rows) => {
         if (err) return res.status(500).json({ success: false });
         res.json({ success: true, analytics: rows || [] });
+    });
+});
+
+// Get Unplaced Students (Verified but not hired)
+app.get('/api/tpo/unplaced-students', (req, res) => {
+    const sql = `
+        SELECT s.id, s.studentName, s.email, s.department, s.cgpa, s.skills
+        FROM students s 
+        WHERE s.status = 'verified' 
+        AND s.id NOT IN (SELECT studentId FROM applications WHERE status = 'hired')
+    `;
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ success: false });
+        res.json({ success: true, students: rows || [] });
+    });
+});
+
+// Post Announcement
+app.post('/api/tpo/announcements', (req, res) => {
+    const { title, message, audience } = req.body;
+    db.run(`INSERT INTO announcements (title, message, audience) VALUES (?, ?, ?)`, 
+    [title, message, audience || 'all'], function(err) {
+        if (err) return res.status(500).json({ success: false });
+        res.json({ success: true, message: "Announcement published successfully." });
+    });
+});
+
+// Get Latest Announcements
+app.get('/api/public/announcements', (req, res) => {
+    db.all(`SELECT * FROM announcements ORDER BY id DESC`, [], (err, rows) => {
+        if (err) return res.status(500).json({ success: false });
+        res.json({ success: true, announcements: rows || [] });
+    });
+});
+
+// ==========================================
+// 9. PHASE 3 APIs (Interviews, Offers, Notifications)
+// ==========================================
+
+app.post('/api/company/schedule-interview', (req, res) => {
+    const { applicationId, date, time, link } = req.body;
+    db.run(`INSERT INTO interviews (applicationId, date, time, link) VALUES (?, ?, ?, ?)`, [applicationId, date, time, link], err => {
+        if(err) return res.json({success: false});
+        
+        db.get(`SELECT studentId FROM applications WHERE id = ?`, [applicationId], (dbErr, row) => {
+            if(row) {
+                const msg = `You have a new Interview scheduled on ${date} at ${time}.`;
+                db.run(`INSERT INTO student_notifications (studentId, message) VALUES (?, ?)`, [row.studentId, msg]);
+            }
+        });
+
+        res.json({success: true, message: "Interview scheduled!"});
+    });
+});
+
+app.post('/api/company/upload-offer', (req, res) => {
+    const { applicationId, offerUrl } = req.body;
+    db.run(`INSERT INTO offers (applicationId, offerUrl) VALUES (?, ?)`, [applicationId, offerUrl], err => {
+        if(err) return res.json({success: false});
+        
+        db.get(`SELECT studentId FROM applications WHERE id = ?`, [applicationId], (dbErr, row) => {
+            if(row) {
+                const msg = `Congratulations! You have received an Offer Letter. Check your Applications tab.`;
+                db.run(`INSERT INTO student_notifications (studentId, message) VALUES (?, ?)`, [row.studentId, msg]);
+            }
+        });
+
+        res.json({success: true, message: "Offer uploaded!"});
+    });
+});
+
+app.get('/api/student/interviews/:studentId', (req, res) => {
+    const sql = `
+        SELECT i.*, j.jobTitle, c.companyName 
+        FROM interviews i
+        JOIN applications a ON i.applicationId = a.id
+        JOIN jobs j ON a.jobId = j.id
+        JOIN companies c ON j.companyId = c.id
+        WHERE a.studentId = ? ORDER BY i.id DESC
+    `;
+    db.all(sql, [req.params.studentId], (err, rows) => {
+        res.json({success: !err, interviews: rows || []});
+    });
+});
+
+app.get('/api/student/notifications/:studentId', (req, res) => {
+    db.all(`SELECT * FROM student_notifications WHERE studentId = ? ORDER BY id DESC`, [req.params.studentId], (err, rows) => {
+        res.json({success: !err, notifications: rows || []});
+    });
+});
+
+// Export Placement Report (CSV)
+app.get('/api/tpo/export-report', (req, res) => {
+    const csvRows = [];
+    csvRows.push("Placement Overview Report");
+    csvRows.push("Metric,Value");
+    
+    db.get(`SELECT COUNT(*) as s FROM students`, (err, r1) => {
+        db.get(`SELECT COUNT(*) as c FROM companies WHERE status='verified'`, (err, r2) => {
+            db.get(`SELECT COUNT(*) as a FROM applications WHERE status='hired'`, (err, r3) => {
+                csvRows.push(`Total Registered Students,${r1 ? r1.s : 0}`);
+                csvRows.push(`Verified Companies,${r2 ? r2.c : 0}`);
+                csvRows.push(`Total Students Placed,${r3 ? r3.a : 0}`);
+                csvRows.push("");
+                
+                csvRows.push("Drive Analytics");
+                csvRows.push("Company Name,Job Title,Total Applications,Shortlisted,Hired");
+                
+                const sql = `
+                    SELECT j.jobTitle, c.companyName,
+                           (SELECT COUNT(*) FROM applications WHERE jobId = j.id) as totalApps,
+                           (SELECT COUNT(*) FROM applications WHERE jobId = j.id AND status = 'shortlisted') as shortlistedApps,
+                           (SELECT COUNT(*) FROM applications WHERE jobId = j.id AND status = 'hired') as hiredApps
+                    FROM jobs j
+                    JOIN companies c ON j.companyId = c.id
+                    ORDER BY j.id DESC
+                `;
+                db.all(sql, [], (err, rows) => {
+                    if (rows) {
+                        rows.forEach(row => {
+                            const company = `"${row.companyName.replace(/"/g, '""')}"`;
+                            const job = `"${row.jobTitle.replace(/"/g, '""')}"`;
+                            csvRows.push(`${company},${job},${row.totalApps},${row.shortlistedApps},${row.hiredApps}`);
+                        });
+                    }
+                    
+                    const csvContent = csvRows.join("\n");
+                    res.setHeader('Content-Type', 'text/csv');
+                    res.setHeader('Content-Disposition', 'attachment; filename="placement_report.csv"');
+                    res.send(csvContent);
+                });
+            });
+        });
     });
 });
 

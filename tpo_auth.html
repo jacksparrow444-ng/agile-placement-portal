@@ -254,7 +254,7 @@
             if (result.success) {
                 if (isLoginMode) {
                     // Save user info to local storage and redirect to dashboard
-                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    localStorage.setItem('currentTpo', JSON.stringify(result.user));
                     window.location.href = 'tpo_dashboard.html';
                 } else {
                     // Display success modal on registration

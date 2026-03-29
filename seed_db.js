@@ -1,5 +1,8 @@
 const sqlite3 = require('sqlite3').verbose();
+const bcrypt = require('bcrypt');
 const db = new sqlite3.Database('./database.db');
+
+const DEFAULT_PASSWORD = bcrypt.hashSync('password123', 10);
 
 const locations = ['Noida', 'Delhi', 'Bengaluru', 'Chandigarh', 'Panchkula', 'Mohali'];
 const depts = ['CSE', 'IT', 'ECE', 'EE', 'ME'];
@@ -30,7 +33,7 @@ db.serialize(() => {
             depts[i % depts.length],
             `mockstudent${i}@college.edu`,
             `98765432${i.toString().padStart(2, '0')}`,
-            `password123`,
+            DEFAULT_PASSWORD,
             parseFloat((Math.random() * 3 + 6.5).toFixed(1)), // 6.5 to 9.5
             2026,
             'React, Node.js, Python, SQL',
@@ -60,7 +63,7 @@ db.serialize(() => {
             `HR ${cName.split(' ')[0]}`,
             `hr@${cName.split(' ')[0].toLowerCase().replace(/[^a-z]/ig,'')}${Date.now() % 1000}.com`, // ensure unique
             `88888888${idx.toString().padStart(2, '0')}`,
-            `password123`,
+            DEFAULT_PASSWORD,
             'verified',
             function(err) {
                 if (err) {

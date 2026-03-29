@@ -70,8 +70,8 @@
     <script>
     let allCompanyJobs = [];
     async function loadMyJobs() {
-        const user = JSON.parse(localStorage.getItem('currentUser'));
-        // Session Check: Agar user nahi hai toh login pe bhejo
+        const user = JSON.parse(localStorage.getItem('currentCompany'));
+        // Session Check: Redirect to login if user not found
         if (!user) {
             window.location.href = 'index.html';
             return;
@@ -86,7 +86,7 @@
             tableBody.innerHTML = '';
 
             if (!data.jobs || data.jobs.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#64748b;">Abhi tak koi job post nahi ki gayi hai.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#64748b;">No jobs posted yet.</td></tr>';
                 return;
             }
 
@@ -133,7 +133,7 @@
                 `;
             });
         } catch (err) { 
-            console.error("Jobs load nahi ho payi:", err); 
+            console.error("Failed to load jobs:", err); 
         }
     }
 
@@ -160,7 +160,7 @@
 
     document.getElementById('editJobForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const user = JSON.parse(localStorage.getItem('currentUser'));
+        const user = JSON.parse(localStorage.getItem('currentCompany'));
         const jobId = document.getElementById('editJobId').value;
         const data = {
             companyId: user.id,
@@ -194,7 +194,7 @@
 
     async function closeJob(id) {
         if (!confirm("Are you sure you want to close this job? Students will no longer be able to apply.")) return;
-        const user = JSON.parse(localStorage.getItem('currentUser'));
+        const user = JSON.parse(localStorage.getItem('currentCompany'));
         try {
             const res = await fetch(`http://localhost:3000/api/company/close-job/${id}`, { 
                 method: 'POST',
@@ -217,10 +217,10 @@
             const res = await fetch(`http://localhost:3000/api/company/delete-job/${id}`, { method: 'DELETE' });
             const result = await res.json();
             if (result.success) {
-                loadMyJobs(); // List refresh karo
+                loadMyJobs(); // Refresh list
             }
         } catch (err) {
-            alert("Delete fail ho gaya. Server check karein.");
+            alert("Delete failed. Please check the server.");
         }
     }
 

@@ -43,6 +43,20 @@
                 <h1><a href="manage_jobs.html" style="color: #64748b; text-decoration: none;"><i class="fas fa-arrow-left"></i></a> Applicants for <span id="jobTitleDisplay" style="color: #1a237e;">Job</span></h1>
             </div>
             
+            <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); display: flex; gap: 15px; align-items: center;">
+                <div style="flex: 1;">
+                    <label style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 5px;">Filter by Skills</label>
+                    <input type="text" id="skillFilter" placeholder="e.g. React, Java, Python" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; box-sizing: border-box;" oninput="filterApplicants()">
+                </div>
+                <div style="width: 200px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 5px;">Minimum CGPA</label>
+                    <input type="number" id="cgpaFilter" placeholder="e.g. 7.5" step="0.1" min="0" max="10" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; box-sizing: border-box;" oninput="filterApplicants()">
+                </div>
+                <div style="padding-top: 22px;">
+                    <button onclick="clearFilters()" style="padding: 10px 15px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; color: #475569; font-weight: 600;">Clear</button>
+                </div>
+            </div>
+
             <table class="premium-table">
                 <thead>
                     <tr>
@@ -72,7 +86,38 @@
         </div>
     </div>
 
-    <script>
+    <div class="modal-overlay" id="interviewModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 8px; width: 400px; max-width: 90%;">
+        <h3 style="margin-top:0;">Schedule Interview</h3>
+        <input type="hidden" id="intAppId">
+        <label style="display:block; margin-top:10px; font-size:13px; font-weight:600; color:#475569;">Date</label>
+        <input type="date" id="intDate" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+        <label style="display:block; margin-top:15px; font-size:13px; font-weight:600; color:#475569;">Time</label>
+        <input type="time" id="intTime" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+        <label style="display:block; margin-top:15px; font-size:13px; font-weight:600; color:#475569;">Meeting Link (e.g. Google Meet, Zoom)</label>
+        <input type="url" id="intLink" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+        <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
+            <button onclick="document.getElementById('interviewModal').style.display='none'" style="padding:10px 15px; border:none; border-radius:6px; background:#e2e8f0; color:#475569; font-weight:600; cursor:pointer;">Cancel</button>
+            <button onclick="submitInterview()" style="background:#6366f1; color:white; padding:10px 15px; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Schedule</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="offerModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 8px; width: 400px; max-width: 90%;">
+        <h3 style="margin-top:0;">Upload Offer Letter</h3>
+        <p style="font-size: 13px; color: #64748b; margin-bottom:15px; margin-top:5px;">Provide an official offer letter link (Drive / PDF URL) for the candidate.</p>
+        <input type="hidden" id="offAppId">
+        <label style="display:block; margin-top:10px; font-size:13px; font-weight:600; color:#475569;">Offer Letter Document Link</label>
+        <input type="url" id="offLink" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;" placeholder="https://docs.google.com/...">
+        <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
+            <button onclick="document.getElementById('offerModal').style.display='none'" style="padding:10px 15px; border:none; border-radius:6px; background:#e2e8f0; color:#475569; font-weight:600; cursor:pointer;">Cancel</button>
+            <button onclick="submitOffer()" style="background:#0284c7; color:white; padding:10px 15px; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Submit Details</button>
+        </div>
+    </div>
+</div>
+
+<script>
         // Get jobId from URL query parameters
         const urlParams = new URLSearchParams(window.location.search);
         const jobId = urlParams.get('jobId');
@@ -110,15 +155,22 @@
                             `;
                         } else if (app.status === 'shortlisted') {
                             actionButtons = `
-                                <button class="action-btn btn-hire" onclick="updateStatus(${app.applicationId}, 'hired')">Hire</button>
-                                <button class="action-btn btn-reject" onclick="updateStatus(${app.applicationId}, 'rejected')">Reject</button>
+                                <div style="display:flex; flex-direction:column; gap:5px;">
+                                    <button class="action-btn btn-hire" onclick="updateStatus(${app.applicationId}, 'hired')" style="width:100%;">Hire</button>
+                                    <button class="action-btn btn-shortlist" onclick="openInterviewModal(${app.applicationId})" style="background:#6366f1; border-color:#6366f1; color:white; width:100%;">Schedule Interview</button>
+                                    <button class="action-btn btn-reject" onclick="updateStatus(${app.applicationId}, 'rejected')" style="width:100%;">Reject</button>
+                                </div>
+                            `;
+                        } else if (app.status === 'hired') {
+                            actionButtons = `
+                                <button class="action-btn btn-hire" onclick="openOfferModal(${app.applicationId})" style="background:#0284c7; border-color:#0284c7; color:white; width:100%;">Upload Offer</button>
                             `;
                         } else {
                             actionButtons = `<span style="color: #94a3b8; font-size: 12px; font-style: italic;">No actions available</span>`;
                         }
 
                         tbody.innerHTML += `
-                            <tr>
+                            <tr class="applicant-row" data-skills="${(app.skills || '').toLowerCase()}" data-cgpa="${app.cgpa || 0}">
                                 <td>
                                     <strong>${app.studentName}</strong><br>
                                     <small style="color: #64748b;">${app.email}</small>
@@ -178,6 +230,82 @@
 
         function closeCoverLetter() {
             document.getElementById('coverLetterModal').style.display = 'none';
+        }
+
+        function filterApplicants() {
+            const skillFilter = document.getElementById('skillFilter').value.toLowerCase();
+            const cgpaFilter = parseFloat(document.getElementById('cgpaFilter').value) || 0;
+            const rows = document.querySelectorAll('.applicant-row');
+
+            rows.forEach(row => {
+                const skills = row.getAttribute('data-skills');
+                const cgpa = parseFloat(row.getAttribute('data-cgpa'));
+
+                const matchesSkill = skills.includes(skillFilter);
+                const matchesCgpa = cgpa >= cgpaFilter;
+
+                if (matchesSkill && matchesCgpa) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function clearFilters() {
+            document.getElementById('skillFilter').value = '';
+            document.getElementById('cgpaFilter').value = '';
+            filterApplicants();
+        }
+
+        function openInterviewModal(appId) {
+            document.getElementById('intAppId').value = appId;
+            document.getElementById('interviewModal').style.display = 'flex';
+        }
+
+        async function submitInterview() {
+            const appId = document.getElementById('intAppId').value;
+            const date = document.getElementById('intDate').value;
+            const time = document.getElementById('intTime').value;
+            const link = document.getElementById('intLink').value;
+            if(!date || !time) return alert("Date and time are required.");
+
+            try {
+                const res = await fetch('http://localhost:3000/api/company/schedule-interview', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ applicationId: appId, date, time, link })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    alert('Interview scheduled successfully!');
+                    document.getElementById('interviewModal').style.display = 'none';
+                } else alert('Error scheduling interview');
+            } catch(e) { alert('Server error'); }
+        }
+
+        function openOfferModal(appId) {
+            document.getElementById('offAppId').value = appId;
+            document.getElementById('offerModal').style.display = 'flex';
+        }
+
+        async function submitOffer() {
+            const appId = document.getElementById('offAppId').value;
+            const link = document.getElementById('offLink').value;
+            if(!link) return alert("Link is required.");
+
+            try {
+                const res = await fetch('http://localhost:3000/api/company/upload-offer', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ applicationId: appId, offerUrl: link })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    alert('Offer letter uploaded successfully!');
+                    document.getElementById('offerModal').style.display = 'none';
+                } else alert('Error uploading offer');
+            } catch(e) { alert('Server error'); }
         }
 
         window.onload = loadApplicants;

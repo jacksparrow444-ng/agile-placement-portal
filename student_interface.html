@@ -228,7 +228,7 @@
             const result = await response.json();
             if (result.success) {
                 if (isLoginMode) {
-                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    localStorage.setItem('currentStudent', JSON.stringify(result.user));
                     window.location.href = 'student_profile.html';
                 } else {
                     document.getElementById('successModal').style.display = 'flex';
@@ -237,7 +237,7 @@
                 alert("Error: " + result.message);
             }
         } catch (err) {
-            alert("Server Error: Terminal mein 'node server.js' chalao!");
+            alert("Server Error: Run 'node server.js' in terminal!");
         }
     });
 </script>

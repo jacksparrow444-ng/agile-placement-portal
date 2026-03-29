@@ -37,7 +37,7 @@
     <script>
         document.getElementById('jobForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const user = JSON.parse(localStorage.getItem('currentUser'));
+            const user = JSON.parse(localStorage.getItem('currentCompany'));
             if (!user) { alert("Please login first"); window.location.href='index.html'; return; }
 
             const formData = new FormData(e.target);

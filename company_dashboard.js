@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    checkStatus(); // Page load hote hi status check karo
+    checkStatus(); // Check status on page load
 });
 
 function checkStatus() {

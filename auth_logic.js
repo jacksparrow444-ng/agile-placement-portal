@@ -16,7 +16,7 @@ async function handleRegistration(event, role) {
         const result = await response.json();
         if (result.success) {
             alert("Registration Successful! Now you can Login.");
-            window.location.href = 'login.html'; // Login page par bhej do
+            window.location.href = 'login.html'; // Redirect to login page
         } else {
             alert("Error: " + result.message);
         }
