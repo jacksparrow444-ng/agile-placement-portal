@@ -64,14 +64,14 @@ const db = {
         }
         if(!params) params = [];
         
-        const pgSql = this._convertSql(sql);
+        const pgSql = db._convertSql(sql);
         pool.query(pgSql, params, (err, res) => {
             if (callback) {
                 const context = { changes: res ? res.rowCount : 0, lastID: res && res.rows && res.rows[0] ? res.rows[0].id : 0 };
                 callback.call(context, err);
             }
         });
-        return this;
+        return db;
     },
     get: function(sql, params, callback) {
         if (typeof params === 'function') {
@@ -80,14 +80,14 @@ const db = {
         }
         if(!params) params = [];
 
-        const pgSql = this._convertSql(sql);
+        const pgSql = db._convertSql(sql);
         pool.query(pgSql, params, (err, res) => {
             if (callback) {
-                const normalizedRows = this._normalizeRows(res ? res.rows : []);
+                const normalizedRows = db._normalizeRows(res ? res.rows : []);
                 callback(err, normalizedRows.length > 0 ? normalizedRows[0] : null);
             }
         });
-        return this;
+        return db;
     },
     all: function(sql, params, callback) {
         if (typeof params === 'function') {
@@ -96,14 +96,14 @@ const db = {
         }
         if(!params) params = [];
 
-        const pgSql = this._convertSql(sql);
+        const pgSql = db._convertSql(sql);
         pool.query(pgSql, params, (err, res) => {
             if (callback) {
-                const normalizedRows = this._normalizeRows(res ? res.rows : []);
+                const normalizedRows = db._normalizeRows(res ? res.rows : []);
                 callback(err, normalizedRows);
             }
         });
-        return this;
+        return db;
     }
 };
 
