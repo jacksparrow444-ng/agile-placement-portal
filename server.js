@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
+require('dotenv').config();
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
@@ -17,15 +18,79 @@ app.use(express.static(__dirname));
 app.use('/uploads', express.static('uploads'));
 
 // ==========================================
-// 2. DATABASE CONNECTION & SETUP
+// 2. DATABASE CONNECTION & POSTGRES WRAPPER
 // ==========================================
-const db = new sqlite3.Database('./database.db', (err) => {
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+});
+
+const db = {
+    serialize: (fn) => fn(),
+    _convertSql: (sql) => {
+        let i = 1;
+        let converted = sql
+            .replace(/\?/g, () => `$${i++}`)
+            .replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
+            .replace(/AUTOINCREMENT/g, 'SERIAL')
+            .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+        return converted;
+    },
+    run: function(sql, params, callback) {
+        if (typeof params === 'function') {
+            callback = params;
+            params = [];
+        }
+        if(!params) params = [];
+        
+        const pgSql = this._convertSql(sql);
+        pool.query(pgSql, params, (err, res) => {
+            if (callback) {
+                // simulate sqlite this.lastID if INSERT
+                const context = { changes: res ? res.rowCount : 0, lastID: res && res.rows && res.rows[0] ? res.rows[0].id : 0 };
+                callback.call(context, err);
+            }
+        });
+        return this;
+    },
+    get: function(sql, params, callback) {
+        if (typeof params === 'function') {
+            callback = params;
+            params = [];
+        }
+        if(!params) params = [];
+
+        const pgSql = this._convertSql(sql);
+        pool.query(pgSql, params, (err, res) => {
+            if (callback) {
+                callback(err, res && res.rows ? res.rows[0] : null);
+            }
+        });
+        return this;
+    },
+    all: function(sql, params, callback) {
+        if (typeof params === 'function') {
+            callback = params;
+            params = [];
+        }
+        if(!params) params = [];
+
+        const pgSql = this._convertSql(sql);
+        pool.query(pgSql, params, (err, res) => {
+            if (callback) {
+                callback(err, res ? res.rows : []);
+            }
+        });
+        return this;
+    }
+};
+
+pool.connect((err, client, release) => {
     if (err) {
-        console.error("❌ Database Connection Error: " + err.message);
+        console.error('❌ Supabase Connection Error', err.stack);
     } else {
-        console.log('✅ Connected to SQLite. FULL MASTER SERVER IS RUNNING.');
-        db.run('PRAGMA journal_mode = WAL;');
-        db.run('PRAGMA busy_timeout = 5000;');
+        console.log('✅ Connected to Supabase PostgreSQL. FULL MASTER SERVER IS RUNNING.');
+        release();
     }
 });
 
@@ -968,10 +1033,9 @@ app.post('/api/admin/settings/broadcast', (req, res) => {
 // ==========================================
 // 9. SERVER START
 // ==========================================
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`=======================================================`);
-    console.log(`🚀 MASTER SERVER RUNNING: http://localhost:${PORT}`);
-    console.log(`🛡️  ALL APIs RESTORED (AUTH, STUDENT, COMPANY, TPO)`);
-    console.log(`=======================================================`);
+    console.log(`=========================================`);
+    console.log(`🚀 SERVER RUNNING ON PORT ${PORT}`);
+    console.log(`=========================================`);
 });
