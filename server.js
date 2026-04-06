@@ -246,6 +246,11 @@ app.post('/api/:role/register', async (req, res) => {
         return res.status(500).json({ success: false, message: "Error securing password." });
     }
 
+    // Roll Number Validation (Cannot be all zeros)
+    if (role === 'student' && userData.rollNumber && /^0+$/.test(userData.rollNumber)) {
+        return res.status(400).json({ success: false, message: "Invalid Roll Number. Cannot be all zeros." });
+    }
+
     // Contact Number Validation (Starts with 6-9 and exactly 10 digits)
     if (userData.contact && !/^[6-9]\d{9}$/.test(userData.contact)) {
         return res.status(400).json({ success: false, message: "Contact number must be exactly 10 digits and start with 6-9." });

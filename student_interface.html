@@ -45,7 +45,8 @@
 
                 <div class="form-row" id="rollRow">
                     <label for="rollNumber">Roll / Registration Number</label>
-                    <input type="text" name="rollNumber" id="rollNumber" placeholder="Enter Roll Number" required pattern="^[0-9]+$" title="Only numbers are allowed" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    <input type="text" name="rollNumber" id="rollNumber" placeholder="Enter Roll Number" required pattern="^[0-9]+$" title="Only numbers are allowed" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, ''); document.getElementById('rollError').style.display='none'">
+                    <span class="error-msg" id="rollError">Roll Number cannot be just zeros (e.g., 000).</span>
                 </div>
 
                 <div class="form-row" id="deptRow">
@@ -219,6 +220,13 @@
             const contactRegex = /^[6-9]\d{9}$/;
             if (!contactInput.value.match(contactRegex)) {
                 document.getElementById('contactError').style.display = 'block';
+                isValid = false;
+            }
+
+            // Roll Number Validation (Disallow all zeros)
+            const rollInput = document.getElementById('rollNumber');
+            if (rollInput.value.match(/^0+$/)) {
+                document.getElementById('rollError').style.display = 'block';
                 isValid = false;
             }
         }
