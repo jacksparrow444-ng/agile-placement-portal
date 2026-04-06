@@ -965,29 +965,41 @@ app.get('/api/public/stats', (req, res) => {
 // ==========================================
 
 // Dashboard Admin Stats
-app.get('/api/admin/stats', (req, res) => {
-    db.serialize(() => {
-        const stats = {};
-        db.get("SELECT COUNT(*) as c FROM students", (err, r) => stats.students = r ? r.c : 0);
-        db.get("SELECT COUNT(*) as c FROM companies", (err, r) => stats.companies = r ? r.c : 0);
-        db.get("SELECT COUNT(*) as c FROM inquiries WHERE status='pending'", (err, r) => {
-            stats.pendingInquiries = r ? r.c : 0;
-            res.json({ success: true, ...stats });
+app.get('/api/admin/stats', async (req, res) => {
+    try {
+        const queries = [
+            pool.query("SELECT COUNT(*) as c FROM students"),
+            pool.query("SELECT COUNT(*) as c FROM companies"),
+            pool.query("SELECT COUNT(*) as c FROM inquiries WHERE status='pending'")
+        ];
+        const results = await Promise.all(queries);
+        res.json({
+            success: true,
+            students: parseInt(results[0].rows[0].c) || 0,
+            companies: parseInt(results[1].rows[0].c) || 0,
+            pendingInquiries: parseInt(results[2].rows[0].c) || 0
         });
-    });
+    } catch (err) {
+        console.error("Admin Stats error:", err);
+        res.status(500).json({ success: false });
+    }
 });
 
 // Fetch All Users for Admin
-app.get('/api/admin/users', (req, res) => {
-    const data = { students: [], companies: [], tpos: [] };
-    db.serialize(() => {
-        db.all("SELECT id, studentName as name, email, 'Student' as role, status FROM students", (err, rows) => data.students = rows || []);
-        db.all("SELECT id, companyName as name, email, 'Company' as role, status FROM companies", (err, rows) => data.companies = rows || []);
-        db.all("SELECT id, staffName as name, email, 'TPO' as role, 'active' as status FROM tpo", (err, rows) => {
-            data.tpos = rows || [];
-            res.json({ success: true, users: [...data.students, ...data.companies, ...data.tpos] });
+app.get('/api/admin/users', async (req, res) => {
+    try {
+        const s = await pool.query("SELECT id, studentname as name, email, 'Student' as role, status FROM students");
+        const c = await pool.query("SELECT id, companyname as name, email, 'Company' as role, status FROM companies");
+        const t = await pool.query("SELECT id, staffname as name, email, 'TPO' as role, 'active' as status FROM tpo");
+        
+        res.json({ 
+            success: true, 
+            users: [...s.rows, ...c.rows, ...t.rows] 
         });
-    });
+    } catch (err) {
+        console.error("Admin Users fetch error:", err);
+        res.status(500).json({ success: false });
+    }
 });
 
 // Delete or Deactivate User
