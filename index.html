@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Placement Portal | Bridge to Future</title>
+    <title>Agile Portal v20.0 | Bridge to Future</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="index.css?v=6.0">
+    <link rel="stylesheet" href="index.css?v=20.0">
     <link rel="manifest" href="manifest.json">
     <style>
         /* --- FINAL AGGRESSIVE MOBILE OVERRIDES --- */
@@ -37,8 +37,8 @@
         }
     </style>
     <script>
-        // --- EMERGENCY SERVICE WORKER KILL & CACHE BUST ---
-        const KILL_VERSION = '10.0';
+        // --- EMERGENCY SERVICE WORKER KILL & CACHE BUST v20.0 ---
+        const KILL_VERSION = '20.0';
         if (localStorage.getItem('portal_kill_v') !== KILL_VERSION) {
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(registrations => {
@@ -51,7 +51,7 @@
                 });
             }
             localStorage.setItem('portal_kill_v', KILL_VERSION);
-            window.location.reload(true);
+            location.href = location.origin + location.pathname + '?v=20.0'; // Hard redirect to break cache
         }
     </script>
     <script>

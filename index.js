@@ -40,15 +40,15 @@ document.addEventListener("DOMContentLoaded", function() {
     // --- Dynamic Stats Fetching (User Story #47 Landing Page API) ---
     const fetchStats = async () => {
         try {
-            const response = await fetch('/api/public/stats');
+            const response = await fetch(`/api/public/stats?t=${new Date().getTime()}`);
             const data = await response.json();
             
             if(data.success) {
                 // Animate counts smoothly
-                animateValue("companiesOnboardCount", 0, data.companiesOnboard, 2000, "+");
-                animateValue("studentsPlacedCount", 0, data.studentsPlaced, 2000, "+");
-                animateValue("activeInternshipsCount", 0, data.activeInternships, 2000, "+");
-                animateValue("placementRateCount", 0, data.placementRate, 2000, "%");
+                if(data.companiesOnboard !== undefined) animateValue("companiesOnboardCount", 0, data.companiesOnboard, 2000, "+");
+                if(data.studentsPlaced !== undefined) animateValue("studentsPlacedCount", 0, data.studentsPlaced, 2000, "+");
+                if(data.activeInternships !== undefined) animateValue("activeInternshipsCount", 0, data.activeInternships, 2000, "+");
+                if(data.placementRate !== undefined) animateValue("placementRateCount", 0, data.placementRate, 2000, "%");
             }
         } catch (error) {
             console.error("Error fetching stats:", error);
@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // --- Live Broadcast Fetching (Sprint 4 WOW) ---
     const fetchBroadcast = async () => {
         try {
-            const res = await fetch('/api/public/hub-data');
+            const res = await fetch(`/api/public/hub-data?t=${new Date().getTime()}`);
             const data = await res.json();
             if(data.success && data.settings && data.settings.broadcast_msg) {
                 const banner = document.getElementById('broadcastBanner');

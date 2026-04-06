@@ -17,6 +17,14 @@ app.use(express.json());
 app.use(express.static(__dirname));
 app.use('/uploads', express.static('uploads'));
 
+// --- FORCE NO-CACHE FOR ALL ROUTES (Solves Persistence Issues) ---
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    next();
+});
+
 // ==========================================
 // 2. DATABASE CONNECTION & POSTGRES WRAPPER
 // ==========================================
@@ -340,6 +348,11 @@ app.post('/api/admin/login', (req, res) => {
 // ==========================================
 // 5.5 RESET PASSWORD API
 // ==========================================
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+});
+
 app.get('/api/public/stats', async (req, res) => {
     try {
         const queries = [
@@ -365,7 +378,9 @@ app.get('/api/public/stats', async (req, res) => {
         res.json({ success: true, ...stats });
     } catch (err) {
         console.error("Stats Error:", err);
-        res.status(500).json({ success: false, message: "Stats error" });
+        if (!res.headersSent) {
+            res.status(500).json({ success: false, message: "Stats error" });
+        }
     }
 });
 
