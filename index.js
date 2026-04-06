@@ -80,21 +80,22 @@ document.addEventListener("DOMContentLoaded", function() {
             const res = await fetch('/api/public/latest-jobs');
             const data = await res.json();
             const container = document.getElementById('latestJobsContainer');
+            if(!container) return;
             
-            if(data.success && data.jobs.length > 0) {
+            if(data.success && data.jobs && data.jobs.length > 0) {
                 container.innerHTML = ''; // clear loading state
                 data.jobs.forEach(job => {
-                    const compInitial = job.companyName.charAt(0).toUpperCase();
+                    const compInitial = (job.companyName || 'C').charAt(0).toUpperCase();
                     container.innerHTML += `
                         <div class="job-item">
                             <div class="job-main-info">
                                 <div class="company-logo" style="background:#f1f5f9; color: var(--primary);">${compInitial}</div>
                                 <div class="job-info">
-                                    <h4>${job.title}</h4>
+                                    <h4>${job.title || 'Untitled Role'}</h4>
                                     <p>
-                                        <span><i class="fas fa-building"></i> ${job.companyName}</span>
-                                        <span><i class="fas fa-map-marker-alt"></i> ${job.location}</span>
-                                        <span><i class="fas fa-rupee-sign"></i> ${job.compensation}</span>
+                                        <span><i class="fas fa-building"></i> ${job.companyName || 'Direct Hiring'}</span>
+                                        <span><i class="fas fa-map-marker-alt"></i> ${job.location || 'Remote'}</span>
+                                        <span><i class="fas fa-rupee-sign"></i> ${job.compensation || 'Competitive'}</span>
                                     </p>
                                 </div>
                             </div>

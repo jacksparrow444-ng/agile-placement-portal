@@ -1,4 +1,4 @@
-/* --- MOBILE RESPONSIVENESS OVERRIDES (v1.1) --- */
+/* --- MOBILE RESPONSIVENESS OVERRIDES (v3.1) --- */
 
 @media (max-width: 992px) {
     .nav-links { gap: 15px !important; }
@@ -6,56 +6,61 @@
 }
 
 @media (max-width: 768px) {
-    /* Navbar overhaul */
-    .navbar { padding: 10px 5% !important; justify-content: space-between !important; }
+    /* Navbar overhaul - Hide all but logo and theme */
+    .navbar { padding: 10px 5% !important; justify-content: space-between !important; height: 60px !important; }
     .nav-links { gap: 10px !important; }
-    .nav-links a:not(.login-header-btn):not(.theme-toggle-btn):not(#themeToggle) { display: none !important; } /* Hide text links */
-    .logo h2 { font-size: 16px !important; line-height: 1.1; white-space: nowrap; }
-    .login-header-btn { padding: 6px 14px !important; font-size: 11px !important; border-radius: 20px !important; }
+    .nav-links a:not(.login-header-btn) { display: none !important; } /* Hide Home/About/Jobs */
+    .logo h2 { font-size: 15px !important; line-height: 1.1; white-space: nowrap; max-width: 60%; overflow: hidden; text-overflow: ellipsis; }
+    .login-header-btn { padding: 6px 12px !important; font-size: 11px !important; border-radius: 20px !important; white-space: nowrap; }
     
-    /* Hero Section Fix */
-    .hero { height: auto !important; min-height: 500px !important; padding: 100px 5% 40px !important; }
-    .hero-content { padding-top: 10px !important; }
-    .hero-content h1 { font-size: 24px !important; line-height: 1.2 !important; margin-bottom: 12px !important; }
-    .hero-content br { display: none; } /* Remove manual break */
-    .hero-content p { font-size: 14px !important; margin-bottom: 20px !important; line-height: 1.6; max-width: 100%; }
-    .floating-badge { display: none !important; } /* Eliminate all overlapping badges */
+    /* Hero Section Fix - Extreme reduction for no overlaps */
+    .hero { height: auto !important; min-height: 480px !important; padding: 120px 5% 40px !important; }
+    .hero-content { padding-top: 0 !important; }
+    .hero-content .badge { font-size: 11px !important; padding: 4px 12px !important; }
+    .hero-content h1 { font-size: 22px !important; line-height: 1.2 !important; margin-bottom: 12px !important; }
+    .hero-content br { display: none !important; } /* Force single line flow */
+    .hero-content p { font-size: 13px !important; margin-bottom: 25px !important; line-height: 1.6; max-width: 100%; color: #e2e8f0; }
+    .floating-badge { display: none !important; visibility: hidden !important; } /* ELIMINATE OVERLAPS */
     
-    /* Stats Cleanup */
+    .hero-btns { flex-direction: column !important; width: 100% !important; gap: 15px !important; padding: 0 10% !important; }
+    .hero-btns .btn { width: 100% !important; padding: 14px !important; font-size: 14px !important; }
+    
+    /* Stats Cleanup - One per row for clarity */
     .stats { 
-        margin-top: -20px !important; padding: 25px 3% !important; 
-        display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 20px !important;
-        width: 94% !important;
+        margin-top: -40px !important; padding: 30px 5% !important; 
+        display: flex !important; flex-direction: column !important; gap: 25px !important;
+        width: 90% !important;
     }
-    .stat-item h2 { font-size: 24px !important; }
-    .stat-item p { font-size: 10px !important; }
+    .stat-item { border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+    .stat-item:last-child { border-bottom: none; }
+    .stat-item h2 { font-size: 28px !important; }
+    .stat-item p { font-size: 12px !important; }
     
     /* Roles Grid */
-    .roles-section { padding: 40px 5% !important; }
+    .roles-section { padding: 50px 5% !important; }
     .section-title { font-size: 24px !important; margin-bottom: 30px !important; }
-    .roles-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
+    .roles-grid { grid-template-columns: 1fr !important; gap: 25px !important; }
     
-    /* Job Listings mobile stack */
+    /* Job Listings mobile card */
     .job-item { 
-        flex-direction: column !important; align-items: flex-start !important; gap: 15px !important; 
-        padding: 20px !important;
+        flex-direction: column !important; align-items: flex-start !important; gap: 18px !important; 
+        padding: 20px !important; border-radius: 16px !important;
     }
-    .job-main-info { align-items: flex-start !important; }
-    .job-info h4 { font-size: 17px !important; }
-    .job-info p { flex-direction: column !important; gap: 5px !important; align-items: flex-start !important; }
-    .apply-small-btn { width: 100% !important; text-align: center !important; display: block; }
+    .job-main-info { align-items: flex-start !important; flex-direction: column !important; gap: 15px !important; }
+    .company-logo { width: 50px !important; height: 50px !important; }
+    .job-info h4 { font-size: 18px !important; line-height: 1.3; }
+    .job-info p { flex-direction: column !important; gap: 8px !important; align-items: flex-start !important; }
+    .apply-small-btn { width: 100% !important; text-align: center !important; padding: 12px !important; }
     
     /* Success Stories */
     .story-grid { grid-template-columns: 1fr !important; padding: 0 5% !important; gap: 20px !important; }
     
     /* Footer */
-    .footer-content { flex-direction: column !important; text-align: center !important; gap: 25px !important; }
+    .footer-content { flex-direction: column !important; text-align: center !important; gap: 30px !important; }
     .footer-logo { text-align: center !important; }
 }
 
 @media (max-width: 480px) {
-    .navbar { flex-wrap: wrap; justify-content: center !important; gap: 8px !important; }
-    .logo h2 { width: 100%; text-align: center; margin-bottom: 5px; font-size: 13px !important; }
-    .hero-content h1 { font-size: 20px !important; }
-    .stats { grid-template-columns: 1fr !important; text-align: center; }
+    .logo h2 { font-size: 13px !important; }
+    .hero-content h1 { font-size: 22px !important; }
 }

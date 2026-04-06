@@ -369,30 +369,29 @@ app.get('/api/public/stats', async (req, res) => {
     }
 });
 
-// --- PUBLIC API (LATEST JOBS) ---
-app.get('/api/public/latest-jobs', (req, res) => {
-    const query = `
-        SELECT 
-            jobs.id, 
-            jobs.jobTitle AS "title", 
-            jobs.location, 
-            jobs.salary AS "compensation", 
-            jobs.jobType AS "jobType", 
-            jobs.workMode AS "workMode", 
-            companies.companyName AS "companyName"
-        FROM jobs 
-        JOIN companies ON jobs.companyId = companies.id 
-        WHERE jobs.status = 'active' OR jobs.status = 'open'
-        ORDER BY jobs.id DESC 
-        LIMIT 3
-    `;
-    db.all(query, [], (err, rows) => {
-        if (err) {
-            console.error("Error fetching latest jobs:", err);
-            return res.status(500).json({ success: false, message: 'Database error' });
-        }
-        res.json({ success: true, jobs: rows });
-    });
+app.get('/api/public/latest-jobs', async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                j.id, 
+                j.jobtitle AS title, 
+                j.location, 
+                j.salary AS compensation, 
+                j.jobtype AS "jobType", 
+                j.workmode AS "workMode", 
+                c.companyname AS "companyName"
+            FROM jobs j
+            JOIN companies c ON j.companyid = c.id 
+            WHERE j.status = 'active' OR j.status = 'open'
+            ORDER BY j.id DESC 
+            LIMIT 3
+        `;
+        const result = await pool.query(query);
+        res.json({ success: true, jobs: result.rows });
+    } catch (err) {
+        console.error("Latest Jobs Error:", err);
+        res.status(500).json({ success: false, message: "Database connection error" });
+    }
 });
 
 // ==========================================
