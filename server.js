@@ -344,7 +344,7 @@ app.get('/api/public/stats', async (req, res) => {
     try {
         const queries = [
             pool.query("SELECT COUNT(*) as count FROM companies"),
-            pool.query("SELECT COUNT(DISTINCT \"studentId\") as count FROM applications WHERE status='hired'"),
+            pool.query("SELECT COUNT(DISTINCT studentid) as count FROM applications WHERE status='hired'"),
             pool.query("SELECT COUNT(*) as count FROM jobs"),
             pool.query("SELECT COUNT(*) as total FROM applications"),
             pool.query("SELECT COUNT(*) as hired FROM applications WHERE status='hired'")
