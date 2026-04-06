@@ -1,14 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Placement Portal | Bridge to Future</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="index.css?v=3.1">
-    <link rel="stylesheet" href="mobile.css?v=3.1">
+    <link rel="stylesheet" href="index.css?v=6.0">
     <link rel="manifest" href="manifest.json">
+    <style>
+        /* --- FINAL AGGRESSIVE MOBILE OVERRIDES --- */
+        @media (max-width: 768px) {
+            .navbar { padding: 5px 3% !important; justify-content: space-between !important; height: 50px !important; }
+            .nav-links a:not(.login-header-btn) { display: none !important; } /* Hard hide text links */
+            .nav-links button#themeToggle { display: none; } /* Hide theme toggle from mobile header to save space */
+            .logo h2 { font-size: 13px !important; line-height: 1.1 !important; max-width: 50% !important; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin: 0 !important; }
+            .login-header-btn { padding: 4px 10px !important; font-size: 9px !important; border-radius: 15px !important; text-transform: none !important; letter-spacing: 0 !important; }
+            
+            .hero { height: auto !important; min-height: 380px !important; padding: 100px 5% 30px !important; text-align: center !important; }
+            .hero-content h1 { font-size: 20px !important; margin-bottom: 15px !important; line-height: 1.2 !important; }
+            .hero-content p { font-size: 13px !important; line-height: 1.5 !important; }
+            .floating-badge { display: none !important; visibility: hidden !important; } /* Eliminate overlaps */
+            
+            .stats { display: flex !important; flex-direction: column !important; gap: 15px !important; margin-top: -30px !important; width: 92% !important; padding: 25px !important; }
+            .stat-item { border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; }
+            .stat-item:last-child { border-bottom: none; }
+            .stat-item h2 { font-size: 24px !important; }
+            
+            .roles-grid { grid-template-columns: 1fr !important; gap: 20px !important; padding: 0 5% !important; }
+            .role-card { padding: 25px !important; }
+            .job-item { flex-direction: column !important; gap: 15px !important; padding: 20px !important; }
+            .apply-small-btn { width: 100% !important; text-align: center !important; }
+        }
+    </style>
+    <script>
+        // Force browser cache refresh on code version change
+        const VERSION = '6.0';
+        if (localStorage.getItem('portal_ver') !== VERSION) {
+            localStorage.setItem('portal_ver', VERSION);
+            window.location.reload(true);
+        }
+    </script>
     <script>
         // PWA Registration & Global Dark Mode Init
         if ('serviceWorker' in navigator) {
@@ -16,11 +51,13 @@
                 navigator.serviceWorker.register('/service-worker.js');
             });
         }
-        if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-theme');
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-theme');
     </script>
 </head>
+
 <body>
-    <div id="broadcastBanner" style="background: #ef4444; color: white; padding: 8px; text-align: center; font-weight: 600; display: none;">
+    <div id="broadcastBanner"
+        style="background: #ef4444; color: white; padding: 8px; text-align: center; font-weight: 600; display: none;">
         <marquee scrollamount="5" id="broadcastMarqueeText"></marquee>
     </div>
     <nav class="navbar">
@@ -31,7 +68,8 @@
             <a href="#home" class="active">Home</a>
             <a href="#about">About</a>
             <a href="#jobs">Jobs</a>
-            <button id="themeToggle" class="theme-toggle-btn" title="Toggle Dark/Light Mode"><i class="fas fa-moon"></i></button>
+            <button id="themeToggle" class="theme-toggle-btn" title="Toggle Dark/Light Mode"><i
+                    class="fas fa-moon"></i></button>
             <a href="#roles" class="login-header-btn">Get Started</a>
         </div>
     </nav>
@@ -55,7 +93,8 @@
         <div class="hero-content">
             <span class="badge">Success Starts Here</span>
             <h1>Connecting Talent with <br><span class="highlight">Opportunity</span></h1>
-            <p>The official portal for students to find dream internships and for companies to hire top-tier talent from our institution.</p>
+            <p>The official portal for students to find dream internships and for companies to hire top-tier talent from
+                our institution.</p>
             <div class="hero-btns">
                 <a href="#roles" class="btn btn-primary-hero">Explore Roles</a>
                 <a href="#about" class="btn btn-outline-hero">Learn More</a>
@@ -137,7 +176,7 @@
             </div>
         </div>
     </section>
-    
+
     <section id="jobs" class="recent-jobs">
         <h2 class="section-title scroll-reveal">Latest Opportunities</h2>
         <div class="job-list scroll-reveal" id="latestJobsContainer">
@@ -160,8 +199,10 @@
                         <span class="company-tag"><i class="fab fa-amazon"></i> Placed at Amazon</span>
                     </div>
                 </div>
-                <p class="story-quote">"Secured a 15 LPA offer at Amazon through this portal. The interview scheduling and document verification process was incredibly seamless!"</p>
-                <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                <p class="story-quote">"Secured a 15 LPA offer at Amazon through this portal. The interview scheduling
+                    and document verification process was incredibly seamless!"</p>
+                <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                        class="fas fa-star"></i><i class="fas fa-star"></i></div>
             </div>
             <div class="story-card premium-card">
                 <div class="story-header">
@@ -171,8 +212,10 @@
                         <span class="company-tag"><i class="fab fa-google"></i> Placed at Google</span>
                     </div>
                 </div>
-                <p class="story-quote">"The TPO staff was very helpful. Tracking my job applications and checking eligibility criteria in real-time saved me so much hassle."</p>
-                <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                <p class="story-quote">"The TPO staff was very helpful. Tracking my job applications and checking
+                    eligibility criteria in real-time saved me so much hassle."</p>
+                <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                        class="fas fa-star"></i><i class="fas fa-star"></i></div>
             </div>
             <div class="story-card premium-card">
                 <div class="story-header">
@@ -182,8 +225,10 @@
                         <span class="company-tag"><i class="fab fa-microsoft"></i> Placed at Microsoft</span>
                     </div>
                 </div>
-                <p class="story-quote">"A phenomenal platform! Got shortlisted for multiple drives. The direct remote-job filtering feature helped me land my dream UI/UX role."</p>
-                <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-stroke"></i></div>
+                <p class="story-quote">"A phenomenal platform! Got shortlisted for multiple drives. The direct
+                    remote-job filtering feature helped me land my dream UI/UX role."</p>
+                <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                        class="fas fa-star"></i><i class="fas fa-star-half-stroke"></i></div>
             </div>
         </div>
     </section>
@@ -192,7 +237,8 @@
         <div class="footer-content">
             <div class="footer-logo">
                 <h2>Placement &<span> Internship</span></h2>
-                <p>Empowering students to achieve their career goals<br> through a robust campus recruitment network.</p>
+                <p>Empowering students to achieve their career goals<br> through a robust campus recruitment network.
+                </p>
             </div>
             <div class="footer-socials">
                 <a href="#"><i class="fab fa-twitter"></i></a>
@@ -209,7 +255,7 @@
         const themeBtn = document.getElementById('themeToggle');
         themeBtn.addEventListener('click', () => {
             document.documentElement.classList.toggle('dark-theme');
-            if(document.documentElement.classList.contains('dark-theme')) {
+            if (document.documentElement.classList.contains('dark-theme')) {
                 localStorage.setItem('theme', 'dark');
             } else {
                 localStorage.setItem('theme', 'light');
@@ -217,4 +263,5 @@
         });
     </script>
 </body>
+
 </html>
