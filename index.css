@@ -43,7 +43,9 @@ body {
     box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-bottom: 1px solid var(--border);
 }
 
-.logo h2 { color: var(--primary); font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+.logo { display: flex; align-items: center; gap: 12px; }
+.brand-img { width: 40px; height: 40px; object-fit: contain; }
+.logo h2 { color: var(--primary); font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
 .logo span { color: var(--accent); }
 
 .nav-links { display: flex; align-items: center; gap: 35px; }
