@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                     </p>
                                 </div>
                             </div>
-                            <a href="student_interface.html" class="apply-small-btn">Apply Now</a>
+                            <a href="student_interface.html" target="_blank" class="apply-small-btn">Apply Now</a>
                         </div>
                     `;
                 });
