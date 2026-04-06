@@ -37,20 +37,25 @@
         }
     </style>
     <script>
-        // Force browser cache refresh on code version change
-        const VERSION = '6.0';
-        if (localStorage.getItem('portal_ver') !== VERSION) {
-            localStorage.setItem('portal_ver', VERSION);
+        // --- EMERGENCY SERVICE WORKER KILL & CACHE BUST ---
+        const KILL_VERSION = '10.0';
+        if (localStorage.getItem('portal_kill_v') !== KILL_VERSION) {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    for (let registration of registrations) { registration.unregister(); }
+                });
+            }
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    for (let name of names) caches.delete(name);
+                });
+            }
+            localStorage.setItem('portal_kill_v', KILL_VERSION);
             window.location.reload(true);
         }
     </script>
     <script>
         // PWA Registration & Global Dark Mode Init
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js');
-            });
-        }
         if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-theme');
     </script>
 </head>

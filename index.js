@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // --- Dynamic Latest Jobs Fetching ---
     const fetchLatestJobs = async () => {
         try {
-            const res = await fetch('/api/public/latest-jobs');
+            const res = await fetch(`/api/public/latest-jobs?t=${new Date().getTime()}`);
             const data = await res.json();
             const container = document.getElementById('latestJobsContainer');
             if(!container) return;
@@ -104,10 +104,12 @@ document.addEventListener("DOMContentLoaded", function() {
                     `;
                 });
             } else {
-                container.innerHTML = `<p style="text-align:center; color: var(--text-muted);">No current openings. Check back soon!</p>`;
+                container.innerHTML = `<p style="text-align:center; padding: 20px; color: var(--text-muted);">No current openings. Check back soon!</p>`;
             }
         } catch (error) {
             console.error("Error fetching latest jobs:", error);
+            const container = document.getElementById('latestJobsContainer');
+            if(container) container.innerHTML = `<p style="text-align:center; color: var(--text-muted);">Error loading jobs. Please refresh.</p>`;
         }
     };
 

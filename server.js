@@ -370,6 +370,13 @@ app.get('/api/public/stats', async (req, res) => {
 });
 
 app.get('/api/public/latest-jobs', async (req, res) => {
+    const timeout = setTimeout(() => {
+        if (!res.headersSent) {
+            console.error("Latest Jobs Timeout reached");
+            res.status(504).json({ success: false, message: "Database request timed out" });
+        }
+    }, 10000); // 10 second safety timeout
+
     try {
         const query = `
             SELECT 
@@ -387,10 +394,16 @@ app.get('/api/public/latest-jobs', async (req, res) => {
             LIMIT 3
         `;
         const result = await pool.query(query);
-        res.json({ success: true, jobs: result.rows });
+        clearTimeout(timeout);
+        if (!res.headersSent) {
+            res.json({ success: true, jobs: result.rows });
+        }
     } catch (err) {
+        clearTimeout(timeout);
         console.error("Latest Jobs Error:", err);
-        res.status(500).json({ success: false, message: "Database connection error" });
+        if (!res.headersSent) {
+            res.status(500).json({ success: false, message: "Database connection error" });
+        }
     }
 });
 
