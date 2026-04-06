@@ -340,29 +340,33 @@ app.post('/api/admin/login', (req, res) => {
 // ==========================================
 // 5.5 RESET PASSWORD API
 // ==========================================
-// --- PUBLIC API (LANDING PAGE STATS) ---
-app.get('/api/public/stats', (req, res) => {
-    const stats = {};
-    db.serialize(() => {
-        // Fetch accurate real data for the portal statistics
-        db.get("SELECT COUNT(*) as count FROM companies", (err, row) => { 
-            stats.companiesOnboard = row ? row.count : 0; 
-        });
-        db.get("SELECT COUNT(DISTINCT studentId) as count FROM applications WHERE status='hired'", (err, row) => { 
-            stats.studentsPlaced = row ? row.count : 0; 
-        });
-        db.get("SELECT COUNT(*) as count FROM jobs", (err, row) => { 
-            stats.activeInternships = row ? row.count : 0; 
-        });
-        db.get("SELECT COUNT(*) as total_apps FROM applications", (err, totalRow) => {
-            db.get("SELECT COUNT(*) as successful_apps FROM applications WHERE status='hired'", (err, successRow) => {
-                const total = totalRow ? totalRow.total_apps : 0;
-                const successful = successRow ? successRow.successful_apps : 0;
-                stats.placementRate = total > 0 ? Math.round((successful / total) * 100) : 0;
-                res.json({ success: true, ...stats }); 
-            });
-        });
-    });
+app.get('/api/public/stats', async (req, res) => {
+    try {
+        const queries = [
+            pool.query("SELECT COUNT(*) as count FROM companies"),
+            pool.query("SELECT COUNT(DISTINCT \"studentId\") as count FROM applications WHERE status='hired'"),
+            pool.query("SELECT COUNT(*) as count FROM jobs"),
+            pool.query("SELECT COUNT(*) as total FROM applications"),
+            pool.query("SELECT COUNT(*) as hired FROM applications WHERE status='hired'")
+        ];
+        
+        const results = await Promise.all(queries);
+        
+        const stats = {
+            companiesOnboard: parseInt(results[0].rows[0].count) || 0,
+            studentsPlaced: parseInt(results[1].rows[0].count) || 0,
+            activeInternships: parseInt(results[2].rows[0].count) || 0
+        };
+        
+        const total = parseInt(results[3].rows[0].total) || 0;
+        const hired = parseInt(results[4].rows[0].hired) || 0;
+        stats.placementRate = total > 0 ? Math.round((hired / total) * 100) : 0;
+        
+        res.json({ success: true, ...stats });
+    } catch (err) {
+        console.error("Stats Error:", err);
+        res.status(500).json({ success: false, message: "Stats error" });
+    }
 });
 
 // --- PUBLIC API (LATEST JOBS) ---
