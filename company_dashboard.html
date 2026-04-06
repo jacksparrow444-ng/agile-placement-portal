@@ -90,7 +90,7 @@
         // --- 3. Server se real-time counts laane wala function ---
         async function fetchFreshStats(companyId) {
             try {
-                const response = await fetch(`http://localhost:3000/api/company/stats/${companyId}`);
+                const response = await fetch(`/api/company/stats/${companyId}`);
                 const data = await response.json();
                 
                 if (data.success) {

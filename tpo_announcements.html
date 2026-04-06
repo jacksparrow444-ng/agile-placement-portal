@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const audience = document.getElementById('aAudience').value;
 
         try {
-            const resp = await fetch('http://localhost:3000/api/tpo/announcements', {
+            const resp = await fetch('/api/tpo/announcements', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ title, message, audience })
@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             // Reusing debug API temporarily to fetch specific data, or we can use drive analytics.
             // But since we just need hired apps, we can do a quick trick using drive-analytics or add an endpoint.
             // Alternatively, since drive analytics only groups by drive, I'll use debug db mapping.
-            const resp = await fetch('http://localhost:3000/api/debug/database');
+            const resp = await fetch('/api/debug/database');
             const data = await resp.json();
             if (data.success) {
                 const list = document.getElementById('recentHiresList');
@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.publishResult = async function(encData) {
         const d = JSON.parse(decodeURIComponent(encData));
         try {
-            const resp = await fetch('http://localhost:3000/api/tpo/announcements', {
+            const resp = await fetch('/api/tpo/announcements', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(d)

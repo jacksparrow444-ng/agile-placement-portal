@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 2. Load Real-time Stats from Server (User Story #25)
     async function fetchStats() {
         try {
-            const response = await fetch('http://localhost:3000/api/tpo/stats');
+            const response = await fetch('/api/tpo/stats');
             const data = await response.json();
             
             if (data.success) {
@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 3. Load Drive Analytics in Activity List (User Story #27)
     async function fetchDriveAnalytics() {
         try {
-            const response = await fetch('http://localhost:3000/api/tpo/drive-analytics');
+            const response = await fetch('/api/tpo/drive-analytics');
             const data = await response.json();
             const list = document.getElementById('activityList');
             
@@ -182,7 +182,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // 4. Download Placement Report (CSV)
 function downloadReport() {
-    window.location.href = 'http://localhost:3000/api/tpo/export-report';
+    window.location.href = '/api/tpo/export-report';
 }
 </script>
 

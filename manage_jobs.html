@@ -79,7 +79,7 @@
 
         try {
             // Recruiter ID ke basis pe jobs mangwao
-            const response = await fetch(`http://localhost:3000/api/company/my-jobs/${user.id}`);
+            const response = await fetch(`/api/company/my-jobs/${user.id}`);
             const data = await response.json();
 
             const tableBody = document.getElementById('jobTableBody');
@@ -177,7 +177,7 @@
         };
 
         try {
-            const res = await fetch(`http://localhost:3000/api/company/edit-job/${jobId}`, {
+            const res = await fetch(`/api/company/edit-job/${jobId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -196,7 +196,7 @@
         if (!confirm("Are you sure you want to close this job? Students will no longer be able to apply.")) return;
         const user = JSON.parse(localStorage.getItem('currentCompany'));
         try {
-            const res = await fetch(`http://localhost:3000/api/company/close-job/${id}`, { 
+            const res = await fetch(`/api/company/close-job/${id}`, { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ companyId: user.id })
@@ -214,7 +214,7 @@
         if (!confirm("Kya aap waqai is job ko delete karna chahte hain?")) return;
         
         try {
-            const res = await fetch(`http://localhost:3000/api/company/delete-job/${id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/company/delete-job/${id}`, { method: 'DELETE' });
             const result = await res.json();
             if (result.success) {
                 loadMyJobs(); // Refresh list

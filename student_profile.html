@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function loadProfileData() {
         try {
-            const response = await fetch(`http://localhost:3000/api/student/get-profile/${user.id}`);
+            const response = await fetch(`/api/student/get-profile/${user.id}`);
             const data = await response.json();
             if (data.success) {
                 const s = data.student;
@@ -232,7 +232,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
             // Note: Update-profile endpoint handles both data and file now
-            const response = await fetch('http://localhost:3000/api/student/upload-resume', {
+            const response = await fetch('/api/student/upload-resume', {
                 method: 'POST',
                 body: formData // No headers needed for FormData, browser sets them
             });

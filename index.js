@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // --- Dynamic Stats Fetching (User Story #47 Landing Page API) ---
     const fetchStats = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/public/stats');
+            const response = await fetch('/api/public/stats');
             const data = await response.json();
             
             if(data.success) {
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // --- Dynamic Latest Jobs Fetching ---
     const fetchLatestJobs = async () => {
         try {
-            const res = await fetch('http://localhost:3000/api/public/latest-jobs');
+            const res = await fetch('/api/public/latest-jobs');
             const data = await res.json();
             const container = document.getElementById('latestJobsContainer');
             
@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // --- Live Broadcast Fetching (Sprint 4 WOW) ---
     const fetchBroadcast = async () => {
         try {
-            const res = await fetch('http://localhost:3000/api/public/hub-data');
+            const res = await fetch('/api/public/hub-data');
             const data = await res.json();
             if(data.success && data.settings && data.settings.broadcast_msg) {
                 const banner = document.getElementById('broadcastBanner');

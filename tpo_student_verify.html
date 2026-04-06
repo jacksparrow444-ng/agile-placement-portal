@@ -64,7 +64,7 @@
 <script>
     async function loadPendingStudents() {
         try {
-            const response = await fetch('http://localhost:3000/api/tpo/pending-students');
+            const response = await fetch('/api/tpo/pending-students');
             const result = await response.json();
 
             const tableBody = document.getElementById('studentTableBody');
@@ -81,7 +81,7 @@
             result.students.forEach(student => {
                 const firstChar = student.studentName.charAt(0).toUpperCase();
                 const resumeLink = student.resumePath ? 
-                    `<a href="http://localhost:3000/${student.resumePath}" target="_blank" style="color: #4f46e5; text-decoration: none; font-size: 14px;"><i class="fas fa-file-pdf"></i> View Resume</a>` : 
+                    `<a href="/${student.resumePath}" target="_blank" style="color: #4f46e5; text-decoration: none; font-size: 14px;"><i class="fas fa-file-pdf"></i> View Resume</a>` : 
                     '<span style="color: #94a3b8; font-size: 13px;">No Resume</span>';
 
                 tableBody.innerHTML += `
@@ -126,7 +126,7 @@
         row.style.pointerEvents = 'none';
 
         try {
-            const response = await fetch('http://localhost:3000/api/tpo/verify-student', {
+            const response = await fetch('/api/tpo/verify-student', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ studentId, action })

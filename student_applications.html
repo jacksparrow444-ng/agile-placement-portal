@@ -65,7 +65,7 @@
         }
 
         try {
-            const response = await fetch(`http://localhost:3000/api/student/my-applications/${user.id}`);
+            const response = await fetch(`/api/student/my-applications/${user.id}`);
             const data = await response.json();
             
             const tableBody = document.getElementById('resultsTableBody');
@@ -140,7 +140,7 @@
         if (!confirm("Are you sure you want to withdraw this application? This cannot be undone.")) return;
         
         try {
-            const response = await fetch(`http://localhost:3000/api/student/withdraw-application/${appId}`, {
+            const response = await fetch(`/api/student/withdraw-application/${appId}`, {
                 method: 'DELETE'
             });
             const result = await response.json();

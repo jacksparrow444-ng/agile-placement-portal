@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-        const response = await fetch('http://localhost:3000/api/tpo/unplaced-students');
+        const response = await fetch('/api/tpo/unplaced-students');
         const data = await response.json();
         const tbody = document.getElementById('unplacedList');
 

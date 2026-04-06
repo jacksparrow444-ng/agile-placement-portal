@@ -41,7 +41,7 @@
             container.innerHTML = '<div class="loader">Refreshing database records...</div>';
             
             try {
-                const response = await fetch('http://localhost:3000/api/debug/database');
+                const response = await fetch('/api/debug/database');
                 const result = await response.json();
                 
                 if (result.success) {

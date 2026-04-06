@@ -112,7 +112,7 @@
     // 1. Fetch data from server
     async function loadJobs() {
         try {
-            const response = await fetch('http://localhost:3000/api/student/available-jobs');
+            const response = await fetch('/api/student/available-jobs');
             const data = await response.json();
             
             if (data.success) {
@@ -127,7 +127,7 @@
 
     async function loadAnnouncements() {
         try {
-            const res = await fetch('http://localhost:3000/api/public/announcements');
+            const res = await fetch('/api/public/announcements');
             const data = await res.json();
             if(data.success && data.announcements.length > 0) {
                 const valid = data.announcements.filter(a => a.audience === 'all' || a.audience === 'students');
@@ -231,7 +231,7 @@
         const coverLetter = document.getElementById('coverLetter').value;
 
         try {
-            const response = await fetch('http://localhost:3000/api/student/apply', {
+            const response = await fetch('/api/student/apply', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

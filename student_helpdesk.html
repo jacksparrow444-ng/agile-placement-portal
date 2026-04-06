@@ -127,7 +127,7 @@
         if(!user) { window.location.href = 'index.html'; return; }
 
         try {
-            const res = await fetch('http://localhost:3000/api/public/hub-data');
+            const res = await fetch('/api/public/hub-data');
             const data = await res.json();
             if(data.success && data.recruiters) {
                 const recContainer = document.getElementById('recruitersList');
@@ -147,7 +147,7 @@
             const msg = document.getElementById('inqMessage').value;
 
             try {
-                const res = await fetch('http://localhost:3000/api/student/inquiry', {
+                const res = await fetch('/api/student/inquiry', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ studentId: user.id, subject: sub, message: msg })

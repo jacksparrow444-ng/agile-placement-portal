@@ -129,7 +129,7 @@
 
         async function loadApplicants() {
             try {
-                const response = await fetch(`http://localhost:3000/api/company/view-applicants/${jobId}`);
+                const response = await fetch(`/api/company/view-applicants/${jobId}`);
                 const data = await response.json();
                 const tbody = document.getElementById('applicantsTableBody');
 
@@ -143,7 +143,7 @@
                     data.applicants.forEach(app => {
                         const statusClass = `status-${app.status.toLowerCase()}`;
                         const resumeHtml = app.resumePath ? 
-                            `<a href="http://localhost:3000/${app.resumePath}" target="_blank" class="resume-link"><i class="fas fa-file-pdf"></i> View Resume</a>` : 
+                            `<a href="/${app.resumePath}" target="_blank" class="resume-link"><i class="fas fa-file-pdf"></i> View Resume</a>` : 
                             '<span style="color: #94a3b8; font-size: 13px;">No resume</span>';
                         
                         // Action buttons logic based on current status
@@ -206,7 +206,7 @@
             if(!confirm(`Are you sure you want to mark this applicant as ${status}?`)) return;
 
             try {
-                const response = await fetch('http://localhost:3000/api/company/update-application-status', {
+                const response = await fetch('/api/company/update-application-status', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ applicationId, status })
@@ -271,7 +271,7 @@
             if(!date || !time) return alert("Date and time are required.");
 
             try {
-                const res = await fetch('http://localhost:3000/api/company/schedule-interview', {
+                const res = await fetch('/api/company/schedule-interview', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ applicationId: appId, date, time, link })
@@ -295,7 +295,7 @@
             if(!link) return alert("Link is required.");
 
             try {
-                const res = await fetch('http://localhost:3000/api/company/upload-offer', {
+                const res = await fetch('/api/company/upload-offer', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ applicationId: appId, offerUrl: link })

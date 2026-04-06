@@ -217,7 +217,7 @@
         let activityChartInstance = null;
 
         async function loadStats() {
-            const res = await fetch('http://localhost:3000/api/admin/stats');
+            const res = await fetch('/api/admin/stats');
             const data = await res.json();
             if(data.success) {
                 document.getElementById('statStudents').innerText = data.students;
@@ -259,7 +259,7 @@
         }
 
         async function loadUsers() {
-            const res = await fetch('http://localhost:3000/api/admin/users');
+            const res = await fetch('/api/admin/users');
             const data = await res.json();
             const tb = document.getElementById('usersTable');
             tb.innerHTML = '';
@@ -292,7 +292,7 @@
         }
 
         async function loadLogs() {
-            const res = await fetch('http://localhost:3000/api/admin/logs');
+            const res = await fetch('/api/admin/logs');
             const data = await res.json();
             const tb = document.getElementById('logsTable');
             tb.innerHTML = '';
@@ -308,7 +308,7 @@
         }
 
         async function loadInquiries() {
-            const res = await fetch('http://localhost:3000/api/admin/inquiries');
+            const res = await fetch('/api/admin/inquiries');
             const data = await res.json();
             const tb = document.getElementById('inquiriesTable');
             tb.innerHTML = '';
@@ -328,7 +328,7 @@
         }
 
         async function resolveInquiry(id) {
-            await fetch('http://localhost:3000/api/admin/reply-inquiry', {
+            await fetch('/api/admin/reply-inquiry', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({id})
             });
@@ -338,7 +338,7 @@
         async function deleteUser(role, id) {
             if(!confirm(`Are you extremely sure you want to completely drop ${role} ID ${id}?`)) return;
             document.body.classList.add('disabled-clicking');
-            const res = await fetch('http://localhost:3000/api/admin/delete-user', {
+            const res = await fetch('/api/admin/delete-user', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({role, id})
             });
@@ -351,18 +351,18 @@
         async function clearLogs() {
             if(!confirm("Are you sure you want to delete ALL system logs? This cannot be undone.")) return;
             document.body.classList.add('disabled-clicking');
-            const res = await fetch('http://localhost:3000/api/admin/clear-logs', { method: 'POST' });
+            const res = await fetch('/api/admin/clear-logs', { method: 'POST' });
             const data = await res.json();
             document.body.classList.remove('disabled-clicking');
             if(data.success) loadLogs();
         }
 
         function backupDB() {
-            window.location.href = 'http://localhost:3000/api/admin/backup';
+            window.location.href = '/api/admin/backup';
         }
 
         function exportLogs() {
-            window.location.href = 'http://localhost:3000/api/admin/export-logs';
+            window.location.href = '/api/admin/export-logs';
         }
 
         document.getElementById('restoreForm').addEventListener('submit', async (e) => {
@@ -370,7 +370,7 @@
             const formData = new FormData();
             formData.append('dbfile', document.getElementById('dbfile').files[0]);
             
-            const res = await fetch('http://localhost:3000/api/admin/restore-db', {
+            const res = await fetch('/api/admin/restore-db', {
                 method: 'POST', body: formData
             });
             const data = await res.json();
@@ -381,7 +381,7 @@
             e.preventDefault();
             const text = document.getElementById('broadcastText').value;
             if(text) {
-                await fetch('http://localhost:3000/api/admin/settings/broadcast', {
+                await fetch('/api/admin/settings/broadcast', {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({text})
                 });

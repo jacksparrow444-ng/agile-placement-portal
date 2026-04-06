@@ -49,7 +49,7 @@
             const data = Object.fromEntries(formData.entries());
             data.companyId = user.id;
 
-            const res = await fetch('http://localhost:3000/api/company/post-job', {
+            const res = await fetch('/api/company/post-job', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)

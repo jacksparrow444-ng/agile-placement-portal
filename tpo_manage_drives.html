@@ -100,7 +100,7 @@
     // 1. Load Drives from Database
     async function loadDrives() {
         try {
-            const response = await fetch('http://localhost:3000/api/tpo/get-drives');
+            const response = await fetch('/api/tpo/get-drives');
             const data = await response.json();
             const list = document.getElementById('drivesList');
             list.innerHTML = "";
@@ -149,7 +149,7 @@
         const jobId = document.getElementById('editJobId').value;
         const status = document.getElementById('editStatus').value;
 
-        const response = await fetch('http://localhost:3000/api/tpo/update-drive-status', {
+        const response = await fetch('/api/tpo/update-drive-status', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ jobId, status })

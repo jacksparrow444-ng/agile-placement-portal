@@ -63,7 +63,7 @@
     // 1. Fetch unverified companies from the backend
     async function loadRequests() {
         try {
-            const response = await fetch('http://localhost:3000/api/tpo/pending-companies');
+            const response = await fetch('/api/tpo/pending-companies');
             const result = await response.json();
 
             const tableBody = document.getElementById('requestTableBody');
@@ -114,7 +114,7 @@
         row.style.pointerEvents = 'none';
 
         try {
-            const response = await fetch('http://localhost:3000/api/tpo/verify-company', {
+            const response = await fetch('/api/tpo/verify-company', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ companyId, action })

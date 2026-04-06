@@ -35,7 +35,7 @@
     async function loadInterviews() {
         const user = JSON.parse(localStorage.getItem('currentStudent'));
         if(!user) return window.location.href='index.html';
-        const res = await fetch('http://localhost:3000/api/student/interviews/' + user.id);
+        const res = await fetch('/api/student/interviews/' + user.id);
         const data = await res.json();
         const list = document.getElementById('interviewList');
         if(data.success && data.interviews.length > 0) {
