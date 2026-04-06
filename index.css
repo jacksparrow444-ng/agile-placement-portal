@@ -293,39 +293,47 @@ textarea:not(:placeholder-shown):invalid {
 }
 
 @media (max-width: 768px) {
-    .navbar { padding: 15px 5%; }
-    .nav-links a:not(.login-header-btn) { display: none; } /* Hide text links on mobile */
-    .logo h2 { font-size: 22px; }
+    .navbar { padding: 10px 5% !important; justify-content: space-around !important; }
+    .nav-links { gap: 10px !important; }
+    .nav-links a:not(.login-header-btn):not(.theme-toggle-btn):not(#themeToggle) { display: none !important; } /* Only keep theme and CTA */
+    .logo h2 { font-size: 16px !important; line-height: 1.1; }
+    .login-header-btn { padding: 8px 15px !important; font-size: 12px !important; }
     
-    .hero { height: auto; padding: 120px 5% 60px; }
-    .hero-content h1 { font-size: 38px; line-height: 1.2; }
-    .hero-content p { font-size: 16px; margin-bottom: 30px; }
-    .floating-badge { display: none; } /* Remove overlapping badges */
+    .hero { height: auto !important; min-height: 450px !important; padding: 120px 5% 50px !important; }
+    .hero-content { padding-top: 10px !important; }
+    .hero-content h1 { font-size: 26px !important; line-height: 1.2 !important; margin-bottom: 12px !important; }
+    .hero-content p { font-size: 14px !important; margin-bottom: 20px !important; line-height: 1.5; }
+    .floating-badge { display: none !important; visibility: hidden !important; } /* Eliminate overlaps */
     
     .stats { 
-        margin-top: -30px; padding: 30px 5%; 
-        display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+        margin-top: -30px !important; padding: 25px 5% !important; 
+        display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 20px !important;
+        width: 92% !important;
     }
-    .stat-item h2 { font-size: 32px; }
+    .stat-item h2 { font-size: 26px !important; }
+    .stat-item p { font-size: 11px !important; }
     
-    .roles-section { padding: 60px 5%; }
-    .section-title { font-size: 32px; margin-bottom: 40px; }
+    .roles-section { padding: 50px 5% !important; }
+    .section-title { font-size: 26px !important; margin-bottom: 30px !important; }
+    .roles-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
     
     .job-item { 
-        flex-direction: column; align-items: flex-start; gap: 20px; 
-        padding: 20px;
+        flex-direction: column !important; align-items: flex-start !important; gap: 15px !important; 
+        padding: 20px !important;
     }
-    .apply-small-btn { width: 100%; text-align: center; }
+    .apply-small-btn { width: 100% !important; text-align: center !important; }
     
-    .story-grid { grid-template-columns: 1fr; padding: 0 5%; }
+    .story-grid { grid-template-columns: 1fr !important; padding: 0 5% !important; gap: 20px !important; }
     
-    .footer-content { flex-direction: column; text-align: center; gap: 30px; }
-    .footer-logo { text-align: center; }
+    .footer-content { flex-direction: column !important; text-align: center !important; gap: 25px !important; }
+    .footer-logo { text-align: center !important; }
 }
 
 @media (max-width: 480px) {
-    .hero-content h1 { font-size: 32px; }
-    .hero-btns { flex-direction: column; width: 100%; }
-    .hero-btns .btn { width: 100%; }
-    .stats { grid-template-columns: 1fr; }
+    .navbar { flex-wrap: wrap; justify-content: center !important; gap: 8px !important; }
+    .logo h2 { width: 100%; text-align: center; margin-bottom: 5px; font-size: 14px !important; }
+    .hero-content h1 { font-size: 22px !important; }
+    .hero-btns { flex-direction: column !important; width: 100% !important; gap: 10px !important; }
+    .hero-btns .btn { width: 100% !important; padding: 12px !important; text-align: center; font-size: 14px !important; }
+    .stats { grid-template-columns: 1fr !important; text-align: center; width: 95% !important; }
 }
