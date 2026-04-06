@@ -7,6 +7,11 @@
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="tpo_auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.css">
+    <style>
+        .iti { width: 100%; display: block; }
+        .iti__country-list { z-index: 2000; background: white; color: black; }
+    </style>
 </head>
 <body>
 
@@ -62,8 +67,8 @@
 
                 <div class="form-row" id="contactRow">
                     <label for="tpoContact">Contact Number</label>
-                    <input type="text" id="tpoContact" name="contact" placeholder="Contact Number" required pattern="^[6-9]\d{9}$" title="Strictly 10 digit number starting with 6-9" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, ''); document.getElementById('contactError').style.display='none'">
-                    <span class="error-msg" id="contactError">Mobile number must be exactly 10 digits and start with 6-9.</span>
+                    <input type="tel" id="tpoContact" name="contact" placeholder="Contact Number" required oninput="document.getElementById('contactError').style.display='none'">
+                    <span class="error-msg" id="contactError">Please enter a valid phone number.</span>
                 </div>
 
                 <div class="form-row" id="passwordRow">
@@ -97,7 +102,22 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js"></script>
 <script>
+    const contactInput = document.querySelector("#tpoContact");
+    const iti = window.intlTelInput(contactInput, {
+        initialCountry: "auto",
+        geoIpLookup: (callback) => {
+            fetch("https://ipapi.co/json")
+                .then((res) => res.json())
+                .then((data) => callback(data.country_code))
+                .catch(() => callback("in"));
+        },
+        separateDialCode: true,
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js",
+    });
+
     function togglePasswordVisibility(inputId, iconId) {
         const input = document.getElementById(inputId);
         const icon = document.getElementById(iconId);
@@ -229,9 +249,7 @@
             }
 
             // Validate Contact
-            const contactInput = document.getElementById('tpoContact');
-            const contactRegex = /^[6-9]\d{9}$/;
-            if (!contactInput.value.match(contactRegex)) {
+            if (!iti.isValidNumber()) {
                 document.getElementById('contactError').style.display = 'block';
                 isValid = false;
             }
@@ -254,6 +272,9 @@
         
         const formData = new FormData(tpoForm);
         const data = Object.fromEntries(formData.entries());
+        
+        // Finalize Contact Format
+        if (!isLoginMode) data.contact = iti.getNumber();
         
         // Dynamic endpoint selection
         const endpoint = isLoginMode ? '/api/login' : '/api/tpo/register';

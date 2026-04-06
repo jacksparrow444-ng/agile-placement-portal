@@ -251,9 +251,9 @@ app.post('/api/:role/register', async (req, res) => {
         return res.status(400).json({ success: false, message: "Invalid Roll Number. Cannot be all zeros." });
     }
 
-    // Contact Number Validation (Starts with 6-9 and exactly 10 digits)
-    if (userData.contact && !/^[6-9]\d{9}$/.test(userData.contact)) {
-        return res.status(400).json({ success: false, message: "Contact number must be exactly 10 digits and start with 6-9." });
+    // Contact Number Validation (International Format: + followed by 7-15 digits)
+    if (userData.contact && !/^\+?[1-9]\d{6,14}$/.test(userData.contact)) {
+        return res.status(400).json({ success: false, message: "Invalid contact number format. Please provide a valid international number." });
     }
 
     // Companies need TPO verification
