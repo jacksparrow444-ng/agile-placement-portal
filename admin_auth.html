@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Portal | Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); height: 100vh; display: flex; align-items: center; justify-content: center; color: #fff; }
+        .login-box { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); padding: 40px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px; text-align: center; box-shadow: 0 15px 25px rgba(0,0,0,0.5); }
+        .login-box h2 { font-weight: 500; font-size: 24px; margin-bottom: 30px; letter-spacing: 1px; }
+        .login-box h2 span { color: #ef4444; font-weight: 700; }
+        .input-group { margin-bottom: 20px; text-align: left; position: relative; }
+        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .input-group input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff; outline: none; transition: 0.3s; }
+        .input-group input:focus { border-color: #ef4444; background: rgba(0,0,0,0.4); }
+        .btn-login { width: 100%; padding: 12px; border: none; background: #ef4444; color: white; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        .btn-login:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); }
+        .back-link { display: inline-block; margin-top: 20px; color: #94a3b8; text-decoration: none; font-size: 14px; transition: 0.3s; }
+        .back-link:hover { color: #fff; }
+        #errorMsg { color: #fca5a5; font-size: 14px; margin-bottom: 15px; display: none; }
+        .disabled-clicking { pointer-events: none !important; opacity: 0.6; cursor: not-allowed !important; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div style="font-size: 40px; color: #ef4444; margin-bottom: 10px;"><i class="fas fa-shield-alt"></i></div>
+        <h2>Super <span>Admin</span> Portal</h2>
+        <p id="errorMsg">Invalid credentials!</p>
+        <form id="adminLoginForm">
+            <div class="input-group">
+                <i class="fas fa-user-shield"></i>
+                <input type="text" id="username" placeholder="Admin Username" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Admin Password" required style="padding-right: 40px;">
+                <i class="fas fa-eye-slash" id="togglePassword" style="position: absolute; left: auto; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #94a3b8;" onclick="togglePasswordVisibility()"></i>
+            </div>
+            <button type="submit" class="btn-login">Secure Login</button>
+        </form>
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Main Site</a>
+    </div>
+
+    <script>
+        function togglePasswordVisibility() {
+            const input = document.getElementById('password');
+            const icon = document.getElementById('togglePassword');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            }
+        }
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const btn = document.querySelector('.btn-login');
+            
+            try {
+                btn.classList.add('disabled-clicking');
+                const res = await fetch('http://localhost:3000/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                const data = await res.json();
+                btn.classList.remove('disabled-clicking');
+                if(data.success) {
+                    localStorage.setItem('adminAuth', 'true');
+                    window.location.href = 'admin_dashboard.html';
+                } else {
+                    errorMsg.innerText = data.message || "Invalid Credentials!";
+                    errorMsg.style.display = 'block';
+                }
+            } catch (err) {
+                btn.classList.remove('disabled-clicking');
+                errorMsg.innerText = "Server Error. Please try again later.";
+                errorMsg.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

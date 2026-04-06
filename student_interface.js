@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // --- 4. Verify OTP ---
-    verifyBtn.addEventListener("click", function () {
+    verifyBtn.addEventListener("click", async function () {
         const enteredOtp = otpInput.value.trim();
         otpError.innerText = "";
 
@@ -139,18 +139,42 @@ document.addEventListener("DOMContentLoaded", function () {
 
         clearInterval(timer);
         
-        // As you are developing frontend, I'm hiding Nirmal's fetch API call temporarily
-        // so you don't get 'localhost:3000' errors while testing the UI flow.
+        // Grab form data
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        data.role = 'student';
         
-        otpModal.style.display = "none";
-        successModal.style.display = "flex";
-        
-        if (isLoginMode) {
-            successTitle.innerText = "Login Successful";
-            successMsg.innerText = "Taking you to your dashboard...";
-        } else {
-            successTitle.innerText = "Registration Successful";
-            successMsg.innerText = "Your student account is created.";
+        // Build Endpoint
+        const endpoint = isLoginMode ? '/api/login' : '/api/student/register';
+
+        try {
+            document.body.classList.add('disabled-clicking');
+            const res = await fetch(`http://localhost:3000${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            document.body.classList.remove('disabled-clicking');
+
+            if (result.success) {
+                otpModal.style.display = "none";
+                successModal.style.display = "flex";
+                
+                if (isLoginMode) {
+                    localStorage.setItem('currentStudent', JSON.stringify(result.user));
+                    successTitle.innerText = "Login Successful";
+                    successMsg.innerText = "Taking you to your dashboard...";
+                } else {
+                    successTitle.innerText = "Registration Successful";
+                    successMsg.innerText = "Your student account is created.";
+                }
+            } else {
+                otpError.innerText = result.message || "Authentication failed.";
+            }
+        } catch (err) {
+            document.body.classList.remove('disabled-clicking');
+            otpError.innerText = "Server Error. Please start the backend server.";
         }
     });
 

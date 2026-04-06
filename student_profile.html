@@ -6,6 +6,16 @@
     <title>My Profile | Placement and Internship</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="student_profile.css">
+    <link rel="manifest" href="manifest.json">
+    <script>if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-theme');</script>
+    <style>
+        @media print {
+            .sidebar, .edit-avatar-btn, #editProfileBtn, button[type="submit"], #printBtn { display: none !important; }
+            .main-content { margin-left: 0 !important; width: 100% !important; padding: 0; }
+            body { background: white !important; color: black !important; }
+            * { text-shadow: none !important; box-shadow: none !important; }
+        }
+    </style>
 </head>
 <body>
 
@@ -19,6 +29,7 @@
             <a href="student_applications.html" class="nav-item" id="nav-apps"><i class="fas fa-layer-group"></i> My Applications</a>
             <a href="student_profile.html" class="nav-item active" id="nav-profile"><i class="fas fa-user-circle"></i> My Profile</a>
             <a href="student_notifications.html" class="nav-item"><i class="fas fa-bell"></i> Notifications</a>
+            <a href="student_helpdesk.html" class="nav-item"><i class="fas fa-info-circle"></i> Info Hub</a>
         </nav>
         <div class="logout-area">
             <a href="index.html" class="nav-item text-danger" onclick="localStorage.clear()"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -40,9 +51,14 @@
                     <h1>Welcome, <span id="studentNameDisplay">Student</span></h1>
                     <p><i class="fas fa-graduation-cap"></i> B.Tech Computer Science | Class of 2026</p>
                 </div>
-                <button type="button" id="editProfileBtn" class="btn-outline-premium">
-                    <i class="fas fa-pen"></i> Edit Profile
-                </button>
+                <div style="display:flex; gap:10px;">
+                    <button type="button" id="printBtn" class="btn-outline-premium" onclick="window.print()" style="background:#10b981; color:white; border:none;">
+                        <i class="fas fa-file-pdf"></i> Generate PDF Resume
+                    </button>
+                    <button type="button" id="editProfileBtn" class="btn-outline-premium">
+                        <i class="fas fa-pen"></i> Edit Profile
+                    </button>
+                </div>
             </div>
         </div>
 

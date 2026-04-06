@@ -39,6 +39,11 @@
             e.preventDefault();
             const user = JSON.parse(localStorage.getItem('currentCompany'));
             if (!user) { alert("Please login first"); window.location.href='index.html'; return; }
+            if (user.status !== 'verified') {
+                alert("❌ Your company is pending TPO verification. You cannot post jobs yet.");
+                window.location.href='company_dashboard.html';
+                return;
+            }
 
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());

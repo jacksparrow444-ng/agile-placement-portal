@@ -250,6 +250,38 @@ body.dark-mode .apply-small-btn { background: rgba(16, 185, 129, 0.2); }
 body.dark-mode .company-logo { background: rgba(255,255,255,0.05) !important; color: white !important; }
 body.dark-mode .companies h3 { color: var(--text-muted); }
 
+/* Live Form Validation Alert */
+input:not(:placeholder-shown):invalid, 
+select:not(:placeholder-shown):invalid, 
+textarea:not(:placeholder-shown):invalid {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Scroll To Top Button */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #3b82f6;
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: 0.3s;
+    z-index: 1000;
+}
+.scroll-top-btn.visible {
+    opacity: 1;
+}
+
 /* --- ANIMATION UTILITY CLASSES --- */
 .scroll-reveal { opacity: 0; transform: translateY(40px); transition: 1s all cubic-bezier(0.165, 0.84, 0.44, 1); }
 .scroll-reveal.active { opacity: 1; transform: translateY(0); }

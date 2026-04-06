@@ -19,6 +19,7 @@
             <a href="student_applications.html" class="nav-item" id="nav-apps"><i class="fas fa-layer-group"></i> My Applications</a>
             <a href="student_profile.html" class="nav-item" id="nav-profile"><i class="fas fa-user-circle"></i> My Profile</a>
             <a href="student_notifications.html" class="nav-item"><i class="fas fa-bell"></i> Notifications</a>
+            <a href="student_helpdesk.html" class="nav-item"><i class="fas fa-info-circle"></i> Info Hub</a>
         </nav>
         <div class="logout-area">
             <a href="index.html" class="nav-item text-danger" onclick="localStorage.clear()"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -217,6 +218,12 @@
         if (!user || !user.id) {
             alert("Please login as a student first!");
             window.location.href = 'index.html';
+            return;
+        }
+        
+        if (user.status !== 'verified') {
+            alert("❌ Your account is pending TPO Verification. You cannot apply to jobs until approved.");
+            closeModal();
             return;
         }
 

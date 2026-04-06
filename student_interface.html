@@ -74,12 +74,29 @@
                 <div class="form-row" id="passwordRow">
                     <label for="password">Password</label>
                     <div style="position: relative;">
-                        <input type="password" name="password" id="password" placeholder="Enter Password (Min 8 characters)" required minlength="8" pattern="^[^'&quot;=<>;\\]+$" title="Minimum 8 characters. Special injection symbols not allowed." oninput="document.getElementById('passwordError').style.display='none'" style="width: 100%; box-sizing: border-box; padding-right: 40px;">
+                        <input type="password" name="password" id="password" placeholder="Enter Password (Min 8 characters)" required minlength="8" pattern="^[^'&quot;=<>;\\]+$" title="Minimum 8 characters. Special injection symbols not allowed." oninput="checkStrength(this.value); document.getElementById('passwordError').style.display='none'" style="width: 100%; box-sizing: border-box; padding-right: 40px;">
                         <i class="fas fa-eye-slash" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #64748b;" onclick="togglePasswordVisibility('password', 'togglePassword')"></i>
                     </div>
+                    <div id="strengthBar" style="height: 4px; width: 0%; transition: 0.3s; margin-top: 5px; border-radius: 2px;"></div>
                     <div style="text-align: right; margin-top: 5px; display: none;" id="forgotPasswordDiv"><a href="forgot_password.html?role=student" style="font-size: 13px; color: #1a237e; text-decoration: none; font-weight: 600;">Forgot Password?</a></div>
                     <span class="error-msg" id="passwordError">Password must be at least 8 chars and contain no injection symbols (' " = < > ; \).</span>
                 </div>
+                
+                <script>
+                    function checkStrength(value) {
+                        const bar = document.getElementById('strengthBar');
+                        if(!value) { bar.style.width = '0%'; return; }
+                        let strength = 0;
+                        if(value.length > 5) strength += 33;
+                        if(value.match(/[A-Z]/) || value.match(/[0-9]/)) strength += 33;
+                        if(value.match(/[^a-zA-Z0-9]/)) strength += 34; // Special char
+                        
+                        bar.style.width = strength + '%';
+                        if(strength <= 33) bar.style.background = '#ef4444'; // Weak
+                        else if(strength <= 66) bar.style.background = '#f59e0b'; // Med
+                        else bar.style.background = '#10b981'; // Strong
+                    }
+                </script>
 
                 <div class="form-row checkbox-row" id="termsRow">
                     <input type="checkbox" id="terms" required>

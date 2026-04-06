@@ -130,7 +130,26 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
+    // --- Live Broadcast Fetching (Sprint 4 WOW) ---
+    const fetchBroadcast = async () => {
+        try {
+            const res = await fetch('http://localhost:3000/api/public/hub-data');
+            const data = await res.json();
+            if(data.success && data.settings && data.settings.broadcast_msg) {
+                const banner = document.getElementById('broadcastBanner');
+                const marquee = document.getElementById('broadcastMarqueeText');
+                if(data.settings.broadcast_msg.trim() !== '') {
+                    marquee.innerHTML = `<i class="fas fa-exclamation-triangle"></i> &nbsp; ${data.settings.broadcast_msg} &nbsp; <i class="fas fa-exclamation-triangle"></i>`;
+                    banner.style.display = 'block';
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     // Execute API pulls on load
     fetchStats();
     fetchLatestJobs();
+    fetchBroadcast();
 });

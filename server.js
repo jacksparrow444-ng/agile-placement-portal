@@ -24,6 +24,8 @@ const db = new sqlite3.Database('./database.db', (err) => {
         console.error("❌ Database Connection Error: " + err.message);
     } else {
         console.log('✅ Connected to SQLite. FULL MASTER SERVER IS RUNNING.');
+        db.run('PRAGMA journal_mode = WAL;');
+        db.run('PRAGMA busy_timeout = 5000;');
     }
 });
 
@@ -118,6 +120,13 @@ db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS interviews (id INTEGER PRIMARY KEY AUTOINCREMENT, applicationId INTEGER, date TEXT, time TEXT, link TEXT)`);
     db.run(`CREATE TABLE IF NOT EXISTS offers (id INTEGER PRIMARY KEY AUTOINCREMENT, applicationId INTEGER, offerUrl TEXT)`);
     db.run(`CREATE TABLE IF NOT EXISTS student_notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, studentId INTEGER, message TEXT, date DATE DEFAULT CURRENT_DATE)`);
+
+    // 4.8 Phase 4 Tables (Super Admin, Logs, Inquiries, Settings, FAQs)
+    db.run(`CREATE TABLE IF NOT EXISTS admins (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT)`);
+    db.run(`CREATE TABLE IF NOT EXISTS system_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, userId TEXT, role TEXT, action TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)`);
+    db.run(`CREATE TABLE IF NOT EXISTS portal_settings (id INTEGER PRIMARY KEY AUTOINCREMENT, settingKey TEXT UNIQUE, settingValue TEXT)`);
+    db.run(`CREATE TABLE IF NOT EXISTS inquiries (id INTEGER PRIMARY KEY AUTOINCREMENT, studentId INTEGER, subject TEXT, message TEXT, status TEXT DEFAULT 'pending', date DATE DEFAULT CURRENT_DATE)`);
+    db.run(`CREATE TABLE IF NOT EXISTS faqs (id INTEGER PRIMARY KEY AUTOINCREMENT, question TEXT, answer TEXT)`);
 });
 
 // ==========================================
@@ -222,6 +231,24 @@ app.post('/api/login', (req, res) => {
         return res.status(400).json({ success: false, message: "Invalid role specified." });
     }
 });
+
+// Admin Login
+app.post('/api/admin/login', (req, res) => {
+    const { username, password } = req.body;
+    db.get(`SELECT * FROM admins WHERE username = ?`, [username], async (err, row) => {
+        if (err || !row) {
+            // Check default admin fallback before rejecting
+            if(username === 'nirmalgupta.vx' && password === 'Nexusgen@786') {
+                return res.json({ success: true, user: { username: 'nirmalgupta.vx' } });
+            }
+            return res.status(401).json({ success: false, message: "Invalid Admin Credentials" });
+        }
+        const match = await bcrypt.compare(password, row.password);
+        if (!match) return res.status(401).json({ success: false, message: "Invalid Admin Credentials" });
+        res.json({ success: true, user: { username: row.username } });
+    });
+});
+
 
 // ==========================================
 // 5.5 RESET PASSWORD API
@@ -379,7 +406,7 @@ app.post('/api/student/apply', (req, res) => {
         return res.status(400).json({ success: false, message: "IDs are missing!" });
     }
 
-    db.get(`SELECT s.cgpa, s.activeBacklogs, j.eligibility, j.maxBacklogs FROM students s, jobs j WHERE s.id = ? AND j.id = ?`, 
+    db.get(`SELECT s.cgpa, s.activeBacklogs, s.status, j.eligibility, j.maxBacklogs FROM students s, jobs j WHERE s.id = ? AND j.id = ?`, 
     [studentId, jobId], (err, row) => {
         if (err) {
             console.log("❌ DATABASE ERROR:", err.message);
@@ -392,6 +419,11 @@ app.post('/api/student/apply', (req, res) => {
         }
 
         console.log("✅ Matching Data Found:", row);
+
+        if (row.status !== 'verified') {
+            console.log(`⚠️ REJECTED: Unverified student attempting to apply.`);
+            return res.status(403).json({ success: false, message: "Your account is pending TPO verification. You cannot apply to jobs yet." });
+        }
 
         const studentCGPA = parseFloat(row.cgpa) || 0;
         const requiredCGPA = parseFloat(row.eligibility) || 0;
@@ -451,17 +483,25 @@ app.delete('/api/student/withdraw-application/:id', (req, res) => {
 
 // Post a New Job
 app.post('/api/company/post-job', (req, res) => {
-    const { companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, deadline } = req.body;
+    const { companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, maxBacklogs, deadline } = req.body;
 
-    db.run(`INSERT INTO jobs (companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, deadline) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
-    [companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, deadline], function(err) {
-        if (err) return res.status(500).json({ success: false });
+    // Verify company status first
+    db.get(`SELECT status FROM companies WHERE id = ?`, [companyId], (err, row) => {
+        if (err || !row) return res.status(500).json({ success: false, message: "DB Error" });
+        if (row.status !== 'verified') {
+            return res.status(403).json({ success: false, message: "Your company is unverified. TPO Approval required." });
+        }
+
+        db.run(`INSERT INTO jobs (companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, maxBacklogs, deadline) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+        [companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, maxBacklogs, deadline], function(err) {
+            if (err) return res.status(500).json({ success: false });
 
         // Phase 3: Auto-notify students
         const jobMsg = `New Job Posted: ${jobTitle}. Check your Job Feed!`;
         db.run(`INSERT INTO student_notifications (studentId, message) SELECT id, ? FROM students WHERE status='verified'`, [jobMsg]);
 
         res.json({ success: true, message: "Job posted successfully!" });
+        });
     });
 });
 
@@ -794,6 +834,136 @@ app.get('/api/public/stats', (req, res) => {
         });
     });
 });
+
+// ==========================================
+// 10. SPRINT 4 APIs (Admin & Student Hub)
+// ==========================================
+
+// Dashboard Admin Stats
+app.get('/api/admin/stats', (req, res) => {
+    db.serialize(() => {
+        const stats = {};
+        db.get("SELECT COUNT(*) as c FROM students", (err, r) => stats.students = r ? r.c : 0);
+        db.get("SELECT COUNT(*) as c FROM companies", (err, r) => stats.companies = r ? r.c : 0);
+        db.get("SELECT COUNT(*) as c FROM inquiries WHERE status='pending'", (err, r) => {
+            stats.pendingInquiries = r ? r.c : 0;
+            res.json({ success: true, ...stats });
+        });
+    });
+});
+
+// Fetch All Users for Admin
+app.get('/api/admin/users', (req, res) => {
+    const data = { students: [], companies: [], tpos: [] };
+    db.serialize(() => {
+        db.all("SELECT id, studentName as name, email, 'Student' as role, status FROM students", (err, rows) => data.students = rows || []);
+        db.all("SELECT id, companyName as name, email, 'Company' as role, status FROM companies", (err, rows) => data.companies = rows || []);
+        db.all("SELECT id, staffName as name, email, 'TPO' as role, 'active' as status FROM tpo", (err, rows) => {
+            data.tpos = rows || [];
+            res.json({ success: true, users: [...data.students, ...data.companies, ...data.tpos] });
+        });
+    });
+});
+
+// Delete or Deactivate User
+app.post('/api/admin/delete-user', (req, res) => {
+    const { role, id } = req.body;
+    let table = role === 'Student' ? 'students' : (role === 'Company' ? 'companies' : 'tpo');
+    db.run(`DELETE FROM ${table} WHERE id=?`, [id], function(err) {
+        if(err) return res.json({success: false, message: "Error deleting user"});
+        db.run(`INSERT INTO system_logs (userId, role, action) VALUES ('Admin', 'Admin', 'Deleted ${role} ID: ${id}')`);
+        res.json({success: true, message: "User deleted successfully!"});
+    });
+});
+
+// Download DB Backup
+app.get('/api/admin/backup', (req, res) => {
+    db.run(`INSERT INTO system_logs (userId, role, action) VALUES ('Admin', 'Admin', 'Downloaded Database Backup')`);
+    res.download('./database.db', `backup-${Date.now()}.db`);
+});
+
+// Get System Logs
+app.get('/api/admin/logs', (req, res) => {
+    db.all("SELECT * FROM system_logs ORDER BY id DESC LIMIT 50", [], (err, rows) => {
+        res.json({ success: true, logs: rows || [] });
+    });
+});
+
+// Get Inquiries
+app.get('/api/admin/inquiries', (req, res) => {
+    db.all("SELECT i.*, s.studentName FROM inquiries i LEFT JOIN students s ON i.studentId = s.id ORDER BY i.id DESC", [], (err, rows) => {
+        res.json({ success: true, inquiries: rows || [] });
+    });
+});
+
+// Admin Reply to Inquiry
+app.post('/api/admin/reply-inquiry', (req, res) => {
+    db.run(`UPDATE inquiries SET status = 'resolved' WHERE id = ?`, [req.body.id], err => res.json({success: !err}));
+});
+
+// Submit Inquiry (Student)
+app.post('/api/student/inquiry', (req, res) => {
+    const { studentId, subject, message } = req.body;
+    db.run(`INSERT INTO inquiries (studentId, subject, message) VALUES (?, ?, ?)`, [studentId, subject, message], err => {
+        if(err) return res.json({success: false, message: "Failed to submit"});
+        res.json({success: true, message: "Message sent to TPO/Admin!"});
+    });
+});
+
+// Student Hub Data
+app.get('/api/public/hub-data', (req, res) => {
+    const data = { faqs: [], settings: {}, recruiters: [] };
+    db.serialize(() => {
+        db.all("SELECT * FROM faqs", (err, rows) => data.faqs = rows || []);
+        db.all("SELECT * FROM portal_settings", (err, rows) => {
+            if(rows) rows.forEach(r => data.settings[r.settingKey] = r.settingValue);
+        });
+        db.all("SELECT companyName FROM companies WHERE status='verified'", (err, rows) => {
+            data.recruiters = rows || [];
+            res.json({ success: true, ...data });
+        });
+    });
+});
+
+// ==========================================
+// WOW APIs (Sprint 4)
+// ==========================================
+app.get('/api/admin/export-logs', (req, res) => {
+    db.all("SELECT * FROM system_logs ORDER BY timestamp DESC", (err, rows) => {
+        if(err) return res.status(500).send("DB Error");
+        let csv = "ID,Action,Admin,Target,Timestamp\n";
+        rows.forEach(r => csv += `${r.id},"${r.action}","${r.adminUser}","${r.targetUser}","${r.timestamp}"\n`);
+        fs.writeFileSync('logs_export.csv', csv);
+        res.download('logs_export.csv');
+    });
+});
+
+app.post('/api/admin/clear-logs', (req, res) => {
+    db.run("DELETE FROM system_logs", [], err => {
+        if(err) return res.json({success: false});
+        res.json({success: true});
+    });
+});
+
+const uploadDB = multer({ dest: 'uploads/' });
+app.post('/api/admin/restore-db', uploadDB.single('dbfile'), (req, res) => {
+    if(!req.file) return res.json({success: false, message: "No file uploaded"});
+    try {
+        fs.copyFileSync(req.file.path, 'database.db');
+        res.json({success: true, message: "Database restored successfully! Please restart server manually."});
+    } catch(err) {
+        res.json({success: false, message: "Error restoring database."});
+    }
+});
+
+app.post('/api/admin/settings/broadcast', (req, res) => {
+    const { text } = req.body;
+    db.run(`INSERT OR REPLACE INTO portal_settings (settingKey, settingValue) VALUES ('broadcast_msg', ?)`, [text], err => {
+        if(err) return res.json({success: false, message: "Error saving broadcast"});
+        res.json({success: true, message: "Broadcast Updated"});
+    });
+});
+
 
 // ==========================================
 // 9. SERVER START
