@@ -285,3 +285,47 @@ textarea:not(:placeholder-shown):invalid {
 /* --- ANIMATION UTILITY CLASSES --- */
 .scroll-reveal { opacity: 0; transform: translateY(40px); transition: 1s all cubic-bezier(0.165, 0.84, 0.44, 1); }
 .scroll-reveal.active { opacity: 1; transform: translateY(0); }
+
+/* --- RESPONSIVE MEDIA QUERIES (S4 PREMIUM FIX) --- */
+@media (max-width: 992px) {
+    .nav-links { gap: 15px; }
+    .hero-content h1 { font-size: 55px; }
+}
+
+@media (max-width: 768px) {
+    .navbar { padding: 15px 5%; }
+    .nav-links a:not(.login-header-btn) { display: none; } /* Hide text links on mobile */
+    .logo h2 { font-size: 22px; }
+    
+    .hero { height: auto; padding: 120px 5% 60px; }
+    .hero-content h1 { font-size: 38px; line-height: 1.2; }
+    .hero-content p { font-size: 16px; margin-bottom: 30px; }
+    .floating-badge { display: none; } /* Remove overlapping badges */
+    
+    .stats { 
+        margin-top: -30px; padding: 30px 5%; 
+        display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+    }
+    .stat-item h2 { font-size: 32px; }
+    
+    .roles-section { padding: 60px 5%; }
+    .section-title { font-size: 32px; margin-bottom: 40px; }
+    
+    .job-item { 
+        flex-direction: column; align-items: flex-start; gap: 20px; 
+        padding: 20px;
+    }
+    .apply-small-btn { width: 100%; text-align: center; }
+    
+    .story-grid { grid-template-columns: 1fr; padding: 0 5%; }
+    
+    .footer-content { flex-direction: column; text-align: center; gap: 30px; }
+    .footer-logo { text-align: center; }
+}
+
+@media (max-width: 480px) {
+    .hero-content h1 { font-size: 32px; }
+    .hero-btns { flex-direction: column; width: 100%; }
+    .hero-btns .btn { width: 100%; }
+    .stats { grid-template-columns: 1fr; }
+}

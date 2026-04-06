@@ -16,18 +16,26 @@ body{
 
 /* MAIN WRAPPER */
 .wrapper{
-    width:1100px;
-    min-height:600px;
+    width: 95%; /* Responsive width */
+    max-width: 1100px;
+    min-height: 600px;
+    height: auto;
     display:flex;
     background:white;
-
     border-radius:20px;
-
     box-shadow:
         0 25px 50px rgba(0,0,0,0.15),
         0 10px 20px rgba(0,0,0,0.08);
-
     overflow:hidden;
+    margin: 20px auto;
+}
+
+@media (max-width: 850px) {
+    body { height: auto; align-items: flex-start; padding: 20px 0; }
+    .wrapper { flex-direction: column; width: 90%; min-height: auto; }
+    .branding { width: 100%; padding: 40px 30px; text-align: center; }
+    .form-section { width: 100%; padding: 40px 30px; }
+    .login-marquee { display: none; } /* Hide marquee on very small screens to save space */
 }
 
 /* LEFT PANEL */
