@@ -36,6 +36,27 @@ const db = {
             .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
         return converted;
     },
+    // Map of lowercase to Original casing for Postgres compatibility
+    _columnMap: {
+        'studentname': 'studentName', 'rollnumber': 'rollNumber', 'passoutyear': 'passoutYear', 'resumepath': 'resumePath', 'activebacklogs': 'activeBacklogs',
+        'companyname': 'companyName', 'hrname': 'hrName',
+        'staffname': 'staffName', 'staffid': 'staffID',
+        'companyid': 'companyId', 'jobtitle': 'jobTitle', 'jobdescription': 'jobDescription', 'maxbacklogs': 'maxBacklogs', 'lastdate': 'lastDate', 'posteddate': 'postedDate', 'jobtype': 'jobType', 'workmode': 'workMode',
+        'studentid': 'studentId', 'jobid': 'jobId', 'applieddate': 'appliedDate', 'coverletter': 'coverLetter',
+        'applicationid': 'applicationId', 'offerurl': 'offerUrl',
+        'userid': 'userId', 'settingkey': 'settingKey', 'settingvalue': 'settingValue'
+    },
+    _normalizeRows: function(rows) {
+        if (!rows) return [];
+        return rows.map(row => {
+            const normalized = {};
+            for (let key in row) {
+                const targetKey = this._columnMap[key.toLowerCase()] || key;
+                normalized[targetKey] = row[key];
+            }
+            return normalized;
+        });
+    },
     run: function(sql, params, callback) {
         if (typeof params === 'function') {
             callback = params;
@@ -46,7 +67,6 @@ const db = {
         const pgSql = this._convertSql(sql);
         pool.query(pgSql, params, (err, res) => {
             if (callback) {
-                // simulate sqlite this.lastID if INSERT
                 const context = { changes: res ? res.rowCount : 0, lastID: res && res.rows && res.rows[0] ? res.rows[0].id : 0 };
                 callback.call(context, err);
             }
@@ -63,7 +83,8 @@ const db = {
         const pgSql = this._convertSql(sql);
         pool.query(pgSql, params, (err, res) => {
             if (callback) {
-                callback(err, res && res.rows ? res.rows[0] : null);
+                const normalizedRows = this._normalizeRows(res ? res.rows : []);
+                callback(err, normalizedRows.length > 0 ? normalizedRows[0] : null);
             }
         });
         return this;
@@ -78,7 +99,8 @@ const db = {
         const pgSql = this._convertSql(sql);
         pool.query(pgSql, params, (err, res) => {
             if (callback) {
-                callback(err, res ? res.rows : []);
+                const normalizedRows = this._normalizeRows(res ? res.rows : []);
+                callback(err, normalizedRows);
             }
         });
         return this;
@@ -346,7 +368,14 @@ app.get('/api/public/stats', (req, res) => {
 // --- PUBLIC API (LATEST JOBS) ---
 app.get('/api/public/latest-jobs', (req, res) => {
     const query = `
-        SELECT jobs.id, jobs.jobTitle as title, jobs.location, jobs.salary as compensation, jobs.jobType, jobs.workMode, companies.companyName 
+        SELECT 
+            jobs.id, 
+            jobs.jobTitle AS "title", 
+            jobs.location, 
+            jobs.salary AS "compensation", 
+            jobs.jobType AS "jobType", 
+            jobs.workMode AS "workMode", 
+            companies.companyName AS "companyName"
         FROM jobs 
         JOIN companies ON jobs.companyId = companies.id 
         WHERE jobs.status = 'active' OR jobs.status = 'open'

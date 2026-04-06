@@ -1,0 +1,12 @@
+node_modules
+.env
+database.db
+database.db-*
+*.log
+migrate_to_supabase.js
+final_migration.js
+inspect_db.js
+read_docx.py
+sprint3_structure.txt
+excel_dump.txt
+/tmp/
