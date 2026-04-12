@@ -702,6 +702,29 @@ app.get('/api/company/view-applicants/:jobId', (req, res) => {
     });
 });
 
+// View All Applicants across all jobs for a Company
+app.get('/api/company/view-applicants-all/:companyId', (req, res) => {
+    const companyId = parseInt(req.params.companyId);
+    if (isNaN(companyId)) return res.json({ success: false, message: "Invalid Company ID" });
+
+    const sql = `
+        SELECT a.id as applicationId, a.coverLetter, a.status, a.appliedDate, 
+               s.studentName, s.email, s.cgpa, s.skills, s.resumePath, s.activeBacklogs,
+               j.jobTitle
+        FROM applications a 
+        JOIN students s ON a.studentId = s.id 
+        JOIN jobs j ON a.jobId = j.id
+        WHERE j.companyId = ?
+    `;
+    db.all(sql, [companyId], (err, rows) => {
+        if (err) {
+            console.error("View All Applicants Error:", err);
+            return res.status(500).json({ success: false });
+        }
+        res.json({ success: true, applicants: rows || [] });
+    });
+});
+
 // Update Application Status (Approve/Reject)
 app.post('/api/company/update-application-status', (req, res) => {
     const { applicationId, status } = req.body;

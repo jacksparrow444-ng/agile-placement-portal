@@ -33,15 +33,15 @@
             <nav style="margin-top:20px; display: flex; flex-direction: column; gap: 5px;">
                 <a href="company_dashboard.html" style="color:white; display:block; padding:12px; text-decoration:none; border-radius: 6px;"><i class="fas fa-home" style="width:20px;"></i> Dashboard</a>
                 <a href="post_job.html" style="color:white; display:block; padding:12px; text-decoration:none; border-radius: 6px;"><i class="fas fa-plus-circle" style="width:20px;"></i> Post New Job</a>
-                <a href="manage_jobs.html" style="color:white; display:block; padding:12px; background:#283593; text-decoration:none; border-radius: 6px;"><i class="fas fa-tasks" style="width:20px;"></i> Manage Jobs</a>
-                <a href="manage_jobs.html" style="color:white; display:block; padding:12px; text-decoration:none; border-radius: 6px;"><i class="fas fa-users" style="width:20px;"></i> View Applicants</a>
+                <a href="manage_jobs.html" style="color:white; display:block; padding:12px; text-decoration:none; border-radius: 6px;"><i class="fas fa-tasks" style="width:20px;"></i> Manage Jobs</a>
+                <a href="view_applicants.html?all=true" style="color:white; display:block; padding:12px; border-radius: 6px; text-decoration:none;"><i class="fas fa-users" style="width:20px;"></i> View Applicants</a>
                 <a href="index.html" onclick="localStorage.clear()" style="color:white; display:block; padding:12px; text-decoration:none; border-radius: 6px; margin-top: 20px;"><i class="fas fa-sign-out-alt" style="width:20px;"></i> Logout</a>
             </nav>
         </aside>
         
         <main style="flex:1; padding:40px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h1><a href="manage_jobs.html" style="color: #64748b; text-decoration: none;"><i class="fas fa-arrow-left"></i></a> Applicants for <span id="jobTitleDisplay" style="color: #1a237e;">Job</span></h1>
+                <h1><a href="manage_jobs.html" id="backLink" style="color: #64748b; text-decoration: none;"><i class="fas fa-arrow-left"></i></a> <span id="headerTitle">Applicants for</span> <span id="jobTitleDisplay" style="color: #1a237e;">Job</span></h1>
             </div>
             
             <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); display: flex; gap: 15px; align-items: center;">
@@ -62,6 +62,7 @@
                 <thead>
                     <tr>
                         <th>Student Name</th>
+                        <th id="jobColHeader" style="display:none;">Job Title</th>
                         <th>Academic Info</th>
                         <th>Skills</th>
                         <th>Resume & Cover Letter</th>
@@ -122,21 +123,36 @@
         // Get jobId from URL query parameters
         const urlParams = new URLSearchParams(window.location.search);
         const jobId = urlParams.get('jobId');
+        const viewAll = urlParams.get('all') === 'true';
+        const user = JSON.parse(localStorage.getItem('currentCompany'));
 
-        if (!jobId) {
-            alert("No job selected!");
+        if (!user) {
+            window.location.href = 'index.html';
+        }
+
+        if (!jobId && !viewAll) {
+            alert("No job selected! Redirecting to Manage Jobs...");
             window.location.href = 'manage_jobs.html';
         }
 
         async function loadApplicants() {
             try {
-                const response = await fetch(`/api/company/view-applicants/${jobId}`);
+                let apiEndpoint = `/api/company/view-applicants/${jobId}`;
+                if (viewAll) {
+                    apiEndpoint = `/api/company/view-applicants-all/${user.id}`;
+                    document.getElementById('headerTitle').innerText = "All Applicants Across Jobs";
+                    document.getElementById('jobTitleDisplay').innerText = "";
+                    document.getElementById('jobColHeader').style.display = "table-cell";
+                    document.getElementById('backLink').href = "company_dashboard.html";
+                }
+
+                const response = await fetch(apiEndpoint);
                 const data = await response.json();
                 const tbody = document.getElementById('applicantsTableBody');
 
                 if (data.success) {
                     if (data.applicants.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">No applications received yet.</td></tr>';
+                        tbody.innerHTML = `<tr><td colspan="${viewAll ? 7 : 6}" style="text-align: center; padding: 30px; color: #64748b;">No applications received yet.</td></tr>`;
                         return;
                     }
 
@@ -179,6 +195,7 @@
                                     <strong>${app.studentName}</strong><br>
                                     <small style="color: #64748b;">${app.email}</small>
                                 </td>
+                                ${viewAll ? `<td style="color: #1e293b; font-weight: 500;">${app.jobTitle}</td>` : ''}
                                 <td>
                                     <i class="fas fa-star" style="color: #f59e0b; font-size: 12px;"></i> <strong>${app.cgpa}</strong> CGPA<br>
                                     <small style="color: #64748b;">Backlogs: ${app.activeBacklogs || 0}</small>
@@ -198,11 +215,11 @@
                         `;
                     });
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Failed to load data.</td></tr>';
+                    tbody.innerHTML = `<tr><td colspan="${viewAll ? 7 : 6}" style="text-align: center; color: red;">Failed to load data.</td></tr>`;
                 }
             } catch (err) {
                 console.error(err);
-                document.getElementById('applicantsTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Server connection error.</td></tr>';
+                document.getElementById('applicantsTableBody').innerHTML = `<tr><td colspan="${viewAll ? 7 : 6}" style="text-align: center; color: red;">Server connection error.</td></tr>`;
             }
         }
 
