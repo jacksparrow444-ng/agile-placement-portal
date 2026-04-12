@@ -683,6 +683,9 @@ app.post('/api/company/close-job/:id', (req, res) => {
 
 // View Applicants for a Job (For Company Dashboard)
 app.get('/api/company/view-applicants/:jobId', (req, res) => {
+    const jobId = parseInt(req.params.jobId);
+    if (isNaN(jobId)) return res.json({ success: false, message: "Invalid Job ID" });
+
     const sql = `
         SELECT a.id as applicationId, a.coverLetter, a.status, a.appliedDate, 
                s.studentName, s.email, s.cgpa, s.skills, s.resumePath, s.activeBacklogs 
@@ -690,8 +693,11 @@ app.get('/api/company/view-applicants/:jobId', (req, res) => {
         JOIN students s ON a.studentId = s.id 
         WHERE a.jobId = ?
     `;
-    db.all(sql, [req.params.jobId], (err, rows) => {
-        if (err) return res.status(500).json({ success: false });
+    db.all(sql, [jobId], (err, rows) => {
+        if (err) {
+            console.error("View Applicants Error:", err);
+            return res.status(500).json({ success: false });
+        }
         res.json({ success: true, applicants: rows || [] });
     });
 });

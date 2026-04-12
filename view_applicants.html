@@ -29,12 +29,13 @@
 <body style="background:#f4f7fe; font-family: sans-serif; margin: 0;">
     <div style="display:flex; min-height:100vh;">
         <aside style="width:260px; background:#1a237e; color:white; padding:20px;">
-            <h2>CompanyPortal</h2>
-            <nav style="margin-top:20px;">
-                <a href="company_dashboard.html" style="color:white; display:block; padding:10px; text-decoration:none;">Dashboard</a>
-                <a href="post_job.html" style="color:white; display:block; padding:10px; text-decoration:none;">Post Job</a>
-                <a href="manage_jobs.html" style="color:white; display:block; padding:10px; background:#283593; text-decoration:none;">Manage Jobs</a>
-                <a href="index.html" onclick="localStorage.clear()" style="color:white; display:block; padding:10px; text-decoration:none; margin-top: auto;">Logout</a>
+            <h2 style="margin:0; color:#fff;">Company<span>Portal</span></h2>
+            <nav style="margin-top:20px; display: flex; flex-direction: column; gap: 5px;">
+                <a href="company_dashboard.html" style="color:white; display:block; padding:12px; text-decoration:none; border-radius: 6px;"><i class="fas fa-home" style="width:20px;"></i> Dashboard</a>
+                <a href="post_job.html" style="color:white; display:block; padding:12px; text-decoration:none; border-radius: 6px;"><i class="fas fa-plus-circle" style="width:20px;"></i> Post New Job</a>
+                <a href="manage_jobs.html" style="color:white; display:block; padding:12px; background:#283593; text-decoration:none; border-radius: 6px;"><i class="fas fa-tasks" style="width:20px;"></i> Manage Jobs</a>
+                <a href="manage_jobs.html" style="color:white; display:block; padding:12px; text-decoration:none; border-radius: 6px;"><i class="fas fa-users" style="width:20px;"></i> View Applicants</a>
+                <a href="index.html" onclick="localStorage.clear()" style="color:white; display:block; padding:12px; text-decoration:none; border-radius: 6px; margin-top: 20px;"><i class="fas fa-sign-out-alt" style="width:20px;"></i> Logout</a>
             </nav>
         </aside>
         
@@ -146,7 +147,7 @@
                             `<a href="/${app.resumePath}" target="_blank" class="resume-link"><i class="fas fa-file-pdf"></i> View Resume</a>` : 
                             '<span style="color: #94a3b8; font-size: 13px;">No resume</span>';
                         
-                        // Action buttons logic based on current status
+                        // Action buttons logic
                         let actionButtons = '';
                         if (app.status === 'pending') {
                             actionButtons = `
@@ -169,6 +170,9 @@
                             actionButtons = `<span style="color: #94a3b8; font-size: 12px; font-style: italic;">No actions available</span>`;
                         }
 
+                        // Robust cover letter handling - Base64 encode to prevent JS injection/crash
+                        const safeCoverLetter = btoa(unescape(encodeURIComponent(app.coverLetter || "No cover letter provided.")));
+
                         tbody.innerHTML += `
                             <tr class="applicant-row" data-skills="${(app.skills || '').toLowerCase()}" data-cgpa="${app.cgpa || 0}">
                                 <td>
@@ -186,7 +190,7 @@
                                 </td>
                                 <td>
                                     ${resumeHtml}<br>
-                                    <button onclick="viewCoverLetter(\`${app.coverLetter.replace(/"/g, '&quot;')}\`)" style="margin-top: 5px; background: none; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; color: #475569;"><i class="fas fa-align-left"></i> Cover Letter</button>
+                                    <button onclick="viewCoverLetter('${safeCoverLetter}', true)" style="margin-top: 5px; background: none; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; color: #475569;"><i class="fas fa-align-left"></i> Cover Letter</button>
                                 </td>
                                 <td><span class="status-badge ${statusClass}">${app.status.charAt(0).toUpperCase() + app.status.slice(1)}</span></td>
                                 <td>${actionButtons}</td>
@@ -223,8 +227,14 @@
             }
         }
 
-        function viewCoverLetter(content) {
-            document.getElementById('modalCoverLetterContent').innerText = content || "No cover letter provided.";
+        function viewCoverLetter(content, isBase64 = false) {
+            let displayContent = content || "No cover letter provided.";
+            if (isBase64) {
+               try {
+                   displayContent = decodeURIComponent(escape(atob(content)));
+               } catch(e) { console.error("Decode error", e); }
+            }
+            document.getElementById('modalCoverLetterContent').innerText = displayContent;
             document.getElementById('coverLetterModal').style.display = 'flex';
         }
 

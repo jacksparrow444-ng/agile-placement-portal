@@ -9,10 +9,12 @@
     <div style="display:flex; min-height:100vh;">
         <aside style="width:260px; background:#1a237e; color:white; padding:20px;">
             <h2>CompanyPortal</h2>
-            <nav style="margin-top:20px;">
-                <a href="company_dashboard.html" style="color:white; display:block; padding:10px; text-decoration:none;">Dashboard</a>
-                <a href="post_job.html" style="color:white; display:block; padding:10px; background:#283593; text-decoration:none;">Post Job</a>
-                <a href="index.html" onclick="localStorage.clear()" style="color:white; display:block; padding:10px; text-decoration:none;">Logout</a>
+            <nav style="margin-top:20px; display: flex; flex-direction: column; gap: 5px;">
+                <a href="company_dashboard.html" style="color:white; display:block; padding:12px; text-decoration:none; border-radius: 6px;"><i class="fas fa-home" style="width:20px;"></i> Dashboard</a>
+                <a href="post_job.html" style="color:white; display:block; padding:12px; background:#283593; text-decoration:none; border-radius: 6px;"><i class="fas fa-plus-circle" style="width:20px;"></i> Post New Job</a>
+                <a href="manage_jobs.html" style="color:white; display:block; padding:12px; text-decoration:none; border-radius: 6px;"><i class="fas fa-tasks" style="width:20px;"></i> Manage Jobs</a>
+                <a href="manage_jobs.html" style="color:white; display:block; padding:12px; text-decoration:none; border-radius: 6px;"><i class="fas fa-users" style="width:20px;"></i> View Applicants</a>
+                <a href="index.html" onclick="localStorage.clear()" style="color:white; display:block; padding:12px; text-decoration:none; border-radius: 6px; margin-top: 20px;"><i class="fas fa-sign-out-alt" style="width:20px;"></i> Logout</a>
             </nav>
         </aside>
         <main style="flex:1; padding:40px;">
