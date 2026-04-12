@@ -26,6 +26,11 @@ app.use((req, res, next) => {
 });
 
 // ==========================================
+// KEEP-ALIVE: Prevent Render cold starts
+// ==========================================
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok', uptime: process.uptime() }));
+
+// ==========================================
 // 2. DATABASE CONNECTION & POSTGRES WRAPPER
 // ==========================================
 const pool = new Pool({
@@ -708,17 +713,27 @@ app.post('/api/company/update-application-status', (req, res) => {
     });
 });
 
-// Company Dashboard Stats
-app.get('/api/company/stats/:id', (req, res) => {
+// Company Dashboard Stats (PARALLEL queries for speed)
+app.get('/api/company/stats/:id', async (req, res) => {
     const companyId = req.params.id;
-    db.get(`SELECT COUNT(*) as j FROM jobs WHERE companyId = ?`, [companyId], (err, r1) => {
-        db.get(`SELECT COUNT(*) as a FROM applications ap JOIN jobs j ON ap.jobId = j.id WHERE j.companyId = ?`, [companyId], (err, r2) => {
-            db.get(`SELECT COUNT(*) as s FROM applications ap JOIN jobs j ON ap.jobId = j.id WHERE j.companyId = ? AND ap.status = 'hired'`, [companyId], (err, r3) => {
-                res.json({ success: true, jobCount: r1 ? r1.j : 0, applicantCount: r2 ? r2.a : 0, selectedCount: r3 ? r3.s : 0 });
-            });
+    try {
+        const [r1, r2, r3] = await Promise.all([
+            pool.query(`SELECT COUNT(*) as j FROM jobs WHERE companyid = $1`, [companyId]),
+            pool.query(`SELECT COUNT(*) as a FROM applications ap JOIN jobs j ON ap.jobid = j.id WHERE j.companyid = $1`, [companyId]),
+            pool.query(`SELECT COUNT(*) as s FROM applications ap JOIN jobs j ON ap.jobid = j.id WHERE j.companyid = $1 AND ap.status = 'hired'`, [companyId])
+        ]);
+        res.json({
+            success: true,
+            jobCount: parseInt(r1.rows[0].j) || 0,
+            applicantCount: parseInt(r2.rows[0].a) || 0,
+            selectedCount: parseInt(r3.rows[0].s) || 0
         });
-    });
+    } catch (err) {
+        console.error('Company stats error:', err.message);
+        res.status(500).json({ success: false, message: 'Stats fetch failed' });
+    }
 });
+
 
 // ==========================================
 // 8. TPO APIs
@@ -775,20 +790,24 @@ app.post('/api/tpo/update-drive-status', (req, res) => {
     });
 });
 
-// TPO Dashboard Stats
-app.get('/api/tpo/stats', (req, res) => {
-    db.get(`SELECT COUNT(*) as s FROM students`, (err, r1) => {
-        db.get(`SELECT COUNT(*) as c FROM companies WHERE status='verified'`, (err, r2) => {
-            db.get(`SELECT COUNT(*) as a FROM applications WHERE status='hired'`, (err, r3) => {
-                res.json({ 
-                    success: true, 
-                    totalStudents: r1 ? r1.s : 0, 
-                    companyCount: r2 ? r2.c : 0, 
-                    placedCount: r3 ? r3.a : 0 
-                });
-            });
+// TPO Dashboard Stats (PARALLEL queries for speed)
+app.get('/api/tpo/stats', async (req, res) => {
+    try {
+        const [r1, r2, r3] = await Promise.all([
+            pool.query(`SELECT COUNT(*) as s FROM students`),
+            pool.query(`SELECT COUNT(*) as c FROM companies WHERE status='verified'`),
+            pool.query(`SELECT COUNT(*) as a FROM applications WHERE status='hired'`)
+        ]);
+        res.json({
+            success: true,
+            totalStudents: parseInt(r1.rows[0].s) || 0,
+            companyCount: parseInt(r2.rows[0].c) || 0,
+            placedCount: parseInt(r3.rows[0].a) || 0
         });
-    });
+    } catch (err) {
+        console.error('TPO stats error:', err.message);
+        res.status(500).json({ success: false, message: 'Stats fetch failed' });
+    }
 });
 
 // Drive Analytics
