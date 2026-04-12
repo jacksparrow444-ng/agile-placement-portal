@@ -227,6 +227,11 @@ db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS portal_settings (id INTEGER PRIMARY KEY AUTOINCREMENT, settingKey TEXT UNIQUE, settingValue TEXT)`);
     db.run(`CREATE TABLE IF NOT EXISTS inquiries (id INTEGER PRIMARY KEY AUTOINCREMENT, studentId INTEGER, subject TEXT, message TEXT, status TEXT DEFAULT 'pending', date DATE DEFAULT CURRENT_DATE)`);
     db.run(`CREATE TABLE IF NOT EXISTS faqs (id INTEGER PRIMARY KEY AUTOINCREMENT, question TEXT, answer TEXT)`);
+
+    // PERFORMANCE INDICES (Postgres Optimization)
+    db.run(`CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_apps_student ON applications(studentId)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_apps_job ON applications(jobId)`);
 });
 
 // ==========================================

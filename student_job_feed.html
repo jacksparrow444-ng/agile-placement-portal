@@ -6,6 +6,31 @@
     <title>Job Feed | Placement & Internship</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="student_job_feed.css">
+    <style>
+        /* Skeleton Animation */
+        @keyframes skeleton-loading {
+            0% { background-color: #f1f5f9; }
+            100% { background-color: #e2e8f0; }
+        }
+        .skeleton {
+            animation: skeleton-loading 1s linear infinite alternate;
+            border-radius: 8px;
+        }
+        .skeleton-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .skeleton-logo { width: 40px; height: 40px; }
+        .skeleton-title { width: 70%; height: 20px; }
+        .skeleton-text { width: 40%; height: 14px; }
+        .skeleton-tags { display: flex; gap: 8px; }
+        .skeleton-tag { width: 60px; height: 24px; }
+    </style>
 </head>
 <body>
 
@@ -78,7 +103,35 @@
             </aside>
 
             <div class="jobs-grid" id="jobsContainer">
+                <!-- Skeleton cards will show here while loading -->
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-logo"></div>
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton-tags">
+                        <div class="skeleton skeleton-tag"></div>
+                        <div class="skeleton skeleton-tag"></div>
+                    </div>
                 </div>
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-logo"></div>
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton-tags">
+                        <div class="skeleton skeleton-tag"></div>
+                        <div class="skeleton skeleton-tag"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-logo"></div>
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton-tags">
+                        <div class="skeleton skeleton-tag"></div>
+                        <div class="skeleton skeleton-tag"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 </div>
@@ -109,35 +162,39 @@
 <script>
     let allJobs = []; 
 
-    // 1. Fetch data from server
-    async function loadJobs() {
+    // Optimized: Fetch data in PARALLEL
+    async function loadDashboardData() {
+        const container = document.getElementById('jobsContainer');
+        // Keep skeleton visible until data is here
+        
         try {
-            const response = await fetch('/api/student/available-jobs');
-            const data = await response.json();
-            
-            if (data.success) {
-                allJobs = data.jobs; 
-                updateLocationDropdown(); 
-                applyFilters(); 
-            }
-        } catch (err) { 
-            console.error("Fetch Error:", err); 
-        }
-    }
+            const [jobsRes, annRes] = await Promise.all([
+                fetch('/api/student/available-jobs').then(r => r.json()),
+                fetch('/api/public/announcements').then(r => r.json())
+            ]);
 
-    async function loadAnnouncements() {
-        try {
-            const res = await fetch('/api/public/announcements');
-            const data = await res.json();
-            if(data.success && data.announcements.length > 0) {
-                const valid = data.announcements.filter(a => a.audience === 'all' || a.audience === 'students');
+            // Handle Announcements
+            if(annRes.success && annRes.announcements.length > 0) {
+                const valid = annRes.announcements.filter(a => a.audience === 'all' || a.audience === 'students');
                 if(valid.length > 0) {
                     document.getElementById('annTitle').innerHTML = '<i class="fas fa-bullhorn"></i> ' + valid[0].title;
                     document.getElementById('annMsg').innerText = valid[0].message;
                     document.getElementById('announcementBanner').style.display = 'block';
                 }
             }
-        } catch(e) {}
+
+            // Handle Jobs
+            if (jobsRes.success) {
+                allJobs = jobsRes.jobs; 
+                updateLocationDropdown(); 
+                applyFilters(); 
+            } else {
+                container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px;"><h3>Failed to load jobs. Please try again.</h3></div>';
+            }
+        } catch (err) { 
+            console.error("Dashboard Load Error:", err); 
+            container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px;"><h3>Server connection error.</h3></div>';
+        }
     }
 
     function updateLocationDropdown() {
@@ -171,11 +228,16 @@
 
     function renderJobs(jobs) {
         const container = document.getElementById('jobsContainer');
-        container.innerHTML = jobs.length ? '' : '<div style="grid-column:1/-1; text-align:center; padding:50px;"><h3>No matching jobs found.</h3></div>';
+        if (!jobs.length) {
+            container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px;"><h3>No matching jobs found.</h3></div>';
+            return;
+        }
         
+        // 🚀 BATCH RENDERING: Build HTML string once
+        let htmlBuffer = '';
         jobs.forEach(job => {
             const letter = job.companyName.charAt(0).toUpperCase();
-            container.innerHTML += `
+            htmlBuffer += `
                 <div class="job-card">
                     <div class="card-header">
                         <div class="company-logo" style="background: #e0f2fe; padding: 10px; border-radius: 8px; font-weight: bold; color: #0369a1; width:40px; text-align:center;">${letter}</div>
@@ -193,10 +255,11 @@
                         </div>
                     </div>
                     <div class="card-footer" style="margin-top: 15px;">
-                        <button class="btn-outline-premium" onclick="openApplyModal(${job.id}, '${job.jobTitle}')" style="width: 100%; border: 2px solid #0ea5e9; color: #0ea5e9; padding: 10px; border-radius: 8px; background: transparent; cursor: pointer; font-weight: 600; transition: 0.3s;">Apply Now</button>
+                        <button class="btn-outline-premium" onclick="openApplyModal(${job.id}, '${job.jobTitle.replace(/'/g, "\\'")}')" style="width: 100%; border: 2px solid #0ea5e9; color: #0ea5e9; padding: 10px; border-radius: 8px; background: transparent; cursor: pointer; font-weight: 600; transition: 0.3s;">Apply Now</button>
                     </div>
                 </div>`;
         });
+        container.innerHTML = htmlBuffer; // Update DOM only ONCE
     }
 
     function openApplyModal(id, title) {
@@ -263,7 +326,7 @@
         el.addEventListener('change', applyFilters);
     });
 
-    window.onload = () => { loadJobs(); loadAnnouncements(); };
+    window.onload = loadDashboardData;
 </script>
 </body>
 </html>
