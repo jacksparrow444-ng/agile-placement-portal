@@ -712,8 +712,10 @@ app.post('/api/company/update-application-status', (req, res) => {
 app.get('/api/company/stats/:id', (req, res) => {
     const companyId = req.params.id;
     db.get(`SELECT COUNT(*) as j FROM jobs WHERE companyId = ?`, [companyId], (err, r1) => {
-        db.get(`SELECT COUNT(*) as a FROM applications a JOIN jobs j ON a.jobId = j.id WHERE j.companyId = ?`, [companyId], (err, r2) => {
-            res.json({ success: true, jobCount: r1 ? r1.j : 0, applicantCount: r2 ? r2.a : 0 });
+        db.get(`SELECT COUNT(*) as a FROM applications ap JOIN jobs j ON ap.jobId = j.id WHERE j.companyId = ?`, [companyId], (err, r2) => {
+            db.get(`SELECT COUNT(*) as s FROM applications ap JOIN jobs j ON ap.jobId = j.id WHERE j.companyId = ? AND ap.status = 'hired'`, [companyId], (err, r3) => {
+                res.json({ success: true, jobCount: r1 ? r1.j : 0, applicantCount: r2 ? r2.a : 0, selectedCount: r3 ? r3.s : 0 });
+            });
         });
     });
 });
@@ -793,9 +795,9 @@ app.get('/api/tpo/stats', (req, res) => {
 app.get('/api/tpo/drive-analytics', (req, res) => {
     const sql = `
         SELECT j.id, j.jobTitle, c.companyName,
-               (SELECT COUNT(*) FROM applications WHERE jobId = j.id) as totalApps,
-               (SELECT COUNT(*) FROM applications WHERE jobId = j.id AND status = 'shortlisted') as shortlistedApps,
-               (SELECT COUNT(*) FROM applications WHERE jobId = j.id AND status = 'hired') as hiredApps
+               (SELECT COUNT(*) FROM applications WHERE jobId = j.id) as "totalApps",
+               (SELECT COUNT(*) FROM applications WHERE jobId = j.id AND status = 'shortlisted') as "shortlistedApps",
+               (SELECT COUNT(*) FROM applications WHERE jobId = j.id AND status = 'hired') as "hiredApps"
         FROM jobs j
         JOIN companies c ON j.companyId = c.id
         ORDER BY j.id DESC
