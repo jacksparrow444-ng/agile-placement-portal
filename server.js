@@ -613,7 +613,7 @@ app.delete('/api/student/withdraw-application/:id', (req, res) => {
 
 // Post a New Job
 app.post('/api/company/post-job', (req, res) => {
-    const { companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, maxBacklogs, deadline } = req.body;
+    const { companyId } = req.body;
 
     // Verify company status first
     db.get(`SELECT status FROM companies WHERE id = ?`, [companyId], (err, row) => {
@@ -622,9 +622,14 @@ app.post('/api/company/post-job', (req, res) => {
             return res.status(403).json({ success: false, message: "Your company is unverified. TPO Approval required." });
         }
 
-        db.run(`INSERT INTO jobs (companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, maxBacklogs, deadline) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
-        [companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, maxBacklogs, deadline], function(err) {
-            if (err) return res.status(500).json({ success: false });
+        const { companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, skills, lastDate, maxBacklogs } = req.body;
+
+        db.run(`INSERT INTO jobs (companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, skills, lastDate, maxBacklogs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+        [companyId, jobTitle, jobDescription, salary, location, jobType, workMode, eligibility, skills, lastDate, maxBacklogs], function(err) {
+            if (err) {
+                console.error("❌ JOB POST ERROR:", err.message);
+                return res.status(500).json({ success: false, message: "Server Error: " + err.message });
+            }
 
         // Phase 3: Auto-notify students
         const jobMsg = `New Job Posted: ${jobTitle}. Check your Job Feed!`;
