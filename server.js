@@ -6,13 +6,28 @@ const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
+const helmet = require('helmet');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 
 // ==========================================
-// 1. MIDDLEWARE CONFIGURATION
+// 1. MIDDLEWARE CONFIGURATION (SECURITY & PERFORMANCE)
 // ==========================================
+app.use(helmet({
+    contentSecurityPolicy: false, // Allow external scripts/fonts for now
+}));
+app.use(compression());
 app.use(cors());
+
+// Rate Limiting (Prevent Brute Force)
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: { success: false, message: "Too many requests from this IP, please try again after 15 minutes." }
+});
+app.use('/api/', limiter);
 app.use(express.json());
 app.use(express.static(__dirname));
 app.use('/uploads', express.static('uploads'));
@@ -280,9 +295,10 @@ app.post('/api/:role/register', async (req, res) => {
             console.error("❌ SQL INSERT ERROR:", err.message);
             console.error("Table:", table, "Data:", userData);
             if (err.message.includes("SQLITE_BUSY")) {
-                return res.status(500).json({ success: false, message: "Database is locked by DB Browser. Please click 'Write Changes' and close it." });
+                return res.status(500).json({ success: false, message: "Server busy. Please try again soon." });
             }
-            return res.status(400).json({ success: false, message: "Email/ID already exists! Try another." });
+            // Generic message to prevent email enumeration
+            return res.status(400).json({ success: false, message: "Invalid registration details. Please check your data and try again." });
         }
         res.json({ success: true, message: "Registered Successfully!" });
     });
@@ -292,14 +308,11 @@ app.post('/api/:role/register', async (req, res) => {
 app.post('/api/login', (req, res) => {
     const { email, staffID, password, role } = req.body;
     
-    // Strict Password Validation (preventing SQL injection payloads)
-    if (!password || /['"=<>;\\]/.test(password)) {
-        return res.status(400).json({ success: false, message: "Invalid password format. Special injection characters not allowed." });
-    }
+    const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}$/;
 
     if (role === 'student') {
         // Must be a valid email
-        if (!email || !/^[\w\.-]+@[\w\.-]+\.\w{2,}$/.test(email)) {
+        if (!email || !STRICT_EMAIL_REGEX.test(email)) {
             return res.status(400).json({ success: false, message: "Invalid College Email format." });
         }
         if (password.length < 8) {
@@ -314,7 +327,7 @@ app.post('/api/login', (req, res) => {
         });
     } else if (role === 'company') {
         // Professional email format explicitly checked
-        if (!email || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+        if (!email || !STRICT_EMAIL_REGEX.test(email)) {
             return res.status(400).json({ success: false, message: "Use a valid professional email (e.g., name@company.com)." });
         }
         db.get(`SELECT * FROM companies WHERE email = ?`, [email], async (err, row) => {

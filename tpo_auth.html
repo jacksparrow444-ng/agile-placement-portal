@@ -8,9 +8,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="tpo_auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            --tpo-accent: #f59e0b;
+        }
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; }
         .iti { width: 100%; display: block; }
         .iti__country-list { z-index: 2000; background: white; color: black; }
+        .form-card { 
+            background: rgba(255, 255, 255, 0.8) !important; 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.4); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+            border-radius: 20px;
+        }
+        .btn-primary { 
+            background: var(--primary-gradient) !important; 
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(37,99,235,0.3);
+            border-radius: 30px !important;
+        }
     </style>
 </head>
 <body>
@@ -61,8 +82,8 @@
 
                 <div class="form-row" id="emailRow">
                     <label for="tpoEmail">Institutional Email</label>
-                    <input type="email" id="tpoEmail" name="email" placeholder="Institutional Email (@college.edu)" required pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" title="Must be a valid professional email format" oninput="document.getElementById('emailError').style.display='none'">
-                    <span class="error-msg" id="emailError">Please enter a valid email address.</span>
+                    <input type="email" id="tpoEmail" name="email" placeholder="Institutional Email (@college.edu)" required pattern="^[a-zA-Z0-9._%+\-]+@([a-zA-Z0-9.\-]+\.)+[a-zA-Z]{2,6}$" title="Must be a valid professional email format (e.g. staff@college.edu)" oninput="document.getElementById('emailError').style.display='none'">
+                    <span class="error-msg" id="emailError">Invalid institutional email. Please check the format.</span>
                 </div>
 
                 <div class="form-row" id="contactRow">
@@ -301,12 +322,19 @@
                     document.getElementById('successModal').style.display = 'flex';
                 }
             } else {
-                alert("Error: " + result.message);
+                alert(result.message || "Invalid credentials or registration details!");
             }
         } catch (err) {
             document.body.classList.remove('disabled-clicking');
-            alert("Connection Error: Ensure that server.js is running in the terminal.");
+            alert("Connection Error: Server is unreachable. Please ensure server.js is running.");
         }
+    });
+
+    // --- GSAP ENTRANCE ANIMATIONS ---
+    window.addEventListener('DOMContentLoaded', () => {
+        gsap.from(".form-card", { duration: 1, y: 50, opacity: 0, ease: "power4.out" });
+        gsap.from(".branding h1", { duration: 1, x: -30, opacity: 0, delay: 0.2 });
+        gsap.from(".branding p", { duration: 1, x: -30, opacity: 0, delay: 0.4 });
     });
 </script>
 

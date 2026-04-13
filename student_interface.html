@@ -9,9 +9,27 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.css">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    }
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    h1, h2, h3 { font-family: 'Outfit', sans-serif; }
     .iti { width: 100%; display: block; }
     .iti__country-list { z-index: 2000; background: white; color: black; }
+    .form-card { 
+        background: rgba(255, 255, 255, 0.8) !important; 
+        backdrop-filter: blur(12px); 
+        border: 1px solid rgba(255, 255, 255, 0.4); 
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+    }
+    .btn-primary { 
+        background: var(--primary-gradient) !important; 
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(37,99,235,0.3);
+    }
 </style>
 </head>
 <body>
@@ -68,8 +86,8 @@
 
                 <div class="form-row" id="emailRow">
                     <label for="email">Institutional Email Address</label>
-                    <input type="email" name="email" id="email" placeholder="Enter Email Address" required pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" title="Must be a valid email format" oninput="document.getElementById('emailError').style.display='none'">
-                    <span class="error-msg" id="emailError">Please enter a valid email address.</span>
+                    <input type="email" name="email" id="email" placeholder="Enter Email Address (@college.edu)" required pattern="^[a-zA-Z0-9._%+\-]+@([a-zA-Z0-9.\-]+\.)+[a-zA-Z]{2,6}$" title="Must be a valid professional email format (e.g. name@college.edu)" oninput="document.getElementById('emailError').style.display='none'">
+                    <span class="error-msg" id="emailError">Invalid email format. Please check your institutional email.</span>
                 </div>
 
                 <div class="form-row" id="contactRow">
@@ -276,11 +294,19 @@
                     document.getElementById('successModal').style.display = 'flex';
                 }
             } else {
-                alert("Error: " + result.message);
+                // Modified message for security/clarity
+                alert(result.message || "Invalid credentials or details!");
             }
         } catch (err) {
-            alert("Server Error: Run 'node server.js' in terminal!");
+            alert("Connection error! Please check if server is running.");
         }
+    });
+
+    // --- UX POLISH: GSAP Entrance Animations ---
+    window.addEventListener('DOMContentLoaded', () => {
+        gsap.from(".form-card", { duration: 1, y: 50, opacity: 0, ease: "power4.out" });
+        gsap.from(".branding h1", { duration: 1, x: -30, opacity: 0, delay: 0.2 });
+        gsap.from(".branding p", { duration: 1, x: -30, opacity: 0, delay: 0.4 });
     });
 </script>
 </body>

@@ -6,6 +6,7 @@
     <title>TPO Overview | Staff Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="tpo_shared.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
 
@@ -178,6 +179,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Initial Load
     fetchStats();
     fetchDriveAnalytics();
+
+    // --- GSAP DASHBOARD ANIMATIONS ---
+    gsap.from(".sidebar", { duration: 1, x: -280, ease: "power4.out" });
+    gsap.from(".top-header", { duration: 0.8, y: -30, opacity: 0, delay: 0.4 });
+    gsap.from(".stat-card", { 
+        duration: 0.8, 
+        y: 30, 
+        opacity: 0, 
+        stagger: 0.2, 
+        delay: 0.6, 
+        ease: "back.out(1.7)" 
+    });
+    gsap.from(".content-card", { duration: 1, opacity: 0, y: 20, delay: 1, stagger: 0.3 });
 });
 
 // 4. Download Placement Report (CSV)
